@@ -12,6 +12,9 @@ import {
   Shield,
   User,
   LogOut,
+  MapPin,
+  Building,
+  Users,
 } from "lucide-react"
 import {
   Sidebar,
@@ -45,38 +48,50 @@ const navItems = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["admin", "operator"] as UserRole[],
+    roles: ["system_admin", "district_manager", "local_admin", "operations"] as UserRole[],
+  },
+  {
+    title: "User Management",
+    href: "/users",
+    icon: Users,
+    roles: ["system_admin", "district_manager"] as UserRole[],
   },
   {
     title: "Venues",
     href: "/venues",
     icon: Building2,
-    roles: ["admin", "operator"] as UserRole[],
+    roles: ["system_admin", "district_manager", "local_admin"] as UserRole[],
   },
   {
     title: "Bookings",
     href: "/bookings",
     icon: Ticket,
-    roles: ["admin"] as UserRole[],
+    roles: ["system_admin", "district_manager", "local_admin", "operations"] as UserRole[],
+  },
+  {
+    title: "Operations",
+    href: "/dashboard/operations",
+    icon: Shield,
+    roles: ["system_admin", "district_manager", "operations"] as UserRole[],
   },
   {
     title: "Calendar",
     href: "/calendar",
     icon: CalendarDays,
-    roles: ["admin", "operator"] as UserRole[],
+    roles: ["system_admin", "district_manager", "local_admin", "operations"] as UserRole[],
   },
   {
-    title: "Logs",
+    title: "System Logs",
     href: "/logs",
     icon: FileText,
-    roles: ["admin"] as UserRole[],
+    roles: ["system_admin"] as UserRole[],
   },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { role, toggleRole, isAdmin, isAuthenticated } = useRole()
+  const { role, toggleRole, isSystemAdmin, isDistrictManager, isLocalAdmin, isOperations, isAuthenticated } = useRole()
   const [loggingOut, setLoggingOut] = useState(false)
 
   const visibleItems = navItems.filter((item) =>
@@ -110,10 +125,10 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
-              MetroMatrix
+              Venue Operations
             </span>
             <span className="text-[10px] text-sidebar-foreground/50 uppercase tracking-widest">
-              Municipal Coordination
+              Municipal Services
             </span>
           </div>
         </Link>
@@ -157,22 +172,30 @@ export function AppSidebar() {
                 "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
               )}
             >
-              {isAdmin ? (
+              {isSystemAdmin ? (
                 <Shield className="h-4 w-4 shrink-0 text-sidebar-primary" />
+              ) : isDistrictManager ? (
+                <MapPin className="h-4 w-4 shrink-0 text-blue-400" />
+              ) : isLocalAdmin ? (
+                <Building className="h-4 w-4 shrink-0 text-emerald-400" />
               ) : (
-                <User className="h-4 w-4 shrink-0 text-emerald-400" />
+                <Users className="h-4 w-4 shrink-0 text-orange-400" />
               )}
               <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
                 <span className="text-sidebar-foreground/80">
-                  Signed in as {isAdmin ? "Admin" : "Operator"}
+                  Signed in as {role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </span>
                 <Badge
                   variant="outline"
                   className={cn(
                     "text-[10px] px-1.5 py-0",
-                    isAdmin
+                    isSystemAdmin
                       ? "border-sidebar-primary/40 text-sidebar-primary"
-                      : "border-emerald-400/40 text-emerald-400"
+                      : isDistrictManager
+                      ? "border-blue-400/40 text-blue-400"
+                      : isLocalAdmin
+                      ? "border-emerald-400/40 text-emerald-400"
+                      : "border-orange-400/40 text-orange-400"
                   )}
                 >
                   Active
@@ -205,22 +228,30 @@ export function AppSidebar() {
               "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
             )}
           >
-            {isAdmin ? (
+            {isSystemAdmin ? (
               <Shield className="h-4 w-4 shrink-0 text-sidebar-primary" />
+            ) : isDistrictManager ? (
+              <MapPin className="h-4 w-4 shrink-0 text-blue-400" />
+            ) : isLocalAdmin ? (
+              <Building className="h-4 w-4 shrink-0 text-emerald-400" />
             ) : (
-              <User className="h-4 w-4 shrink-0 text-emerald-400" />
+              <Users className="h-4 w-4 shrink-0 text-orange-400" />
             )}
             <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
               <span className="text-sidebar-foreground/80">
-                {isAdmin ? "Admin" : "Operator"}
+                {role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </span>
               <Badge
                 variant="outline"
                 className={cn(
                   "text-[10px] px-1.5 py-0",
-                  isAdmin
+                  isSystemAdmin
                     ? "border-sidebar-primary/40 text-sidebar-primary"
-                    : "border-emerald-400/40 text-emerald-400"
+                    : isDistrictManager
+                    ? "border-blue-400/40 text-blue-400"
+                    : isLocalAdmin
+                    ? "border-emerald-400/40 text-emerald-400"
+                    : "border-orange-400/40 text-orange-400"
                 )}
               >
                 Switch

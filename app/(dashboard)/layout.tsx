@@ -15,6 +15,10 @@ import { useRole } from "@/components/role-provider"
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
+  "/dashboard/system-admin": "System Admin Dashboard",
+  "/dashboard/district-manager": "District Manager Dashboard", 
+  "/dashboard/local-admin": "Local Admin Dashboard",
+  "/dashboard/operations": "Operations Dashboard",
   "/venues": "Venue Management",
   "/bookings": "Booking Management",
   "/calendar": "Master Calendar",

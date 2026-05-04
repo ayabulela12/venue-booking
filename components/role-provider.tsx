@@ -15,8 +15,12 @@ interface RoleContextValue {
   role: UserRole
   setRole: (role: UserRole) => void
   toggleRole: () => void
-  isAdmin: boolean
-  isOperator: boolean
+  isSystemAdmin: boolean
+  isDistrictManager: boolean
+  isLocalAdmin: boolean
+  isOperations: boolean
+  isAdmin: boolean // Backward compatibility
+  isOperator: boolean // Backward compatibility
   isAuthenticated: boolean
   authLoading: boolean
 }
@@ -24,18 +28,26 @@ interface RoleContextValue {
 const RoleContext = createContext<RoleContextValue | null>(null)
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRole] = useState<UserRole>("operator")
+  const [role, setRole] = useState<UserRole>("local_admin")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [authLoading, setAuthLoading] = useState(true)
 
   const roleFromSession = useCallback((session: Session | null): UserRole => {
-    if (!session?.user) return "operator"
+    if (!session?.user) return "local_admin"
     
-    // For now, fall back to user_metadata for immediate compatibility
-    // TODO: Once all users have profiles, switch to profiles table lookup
     const metadata = session?.user?.user_metadata as Record<string, unknown> | undefined
-    if (metadata?.role === "admin") return "admin"
-    return "operator"
+    
+    // New hierarchical roles (priority)
+    if (metadata?.role === "system_admin") return "system_admin"
+    if (metadata?.role === "district_manager") return "district_manager"
+    if (metadata?.role === "local_admin") return "local_admin"
+    if (metadata?.role === "operations") return "operations"
+    
+    // Backward compatibility mapping
+    if (metadata?.role === "admin") return "system_admin"      // Existing admin → System Admin
+    if (metadata?.role === "operator") return "local_admin"    // Existing operator → Local Admin
+    
+    return "local_admin"
   }, [])
 
   useEffect(() => {
@@ -61,7 +73,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         // eslint-disable-next-line no-console
         console.error(err)
         setIsAuthenticated(false)
-        setRole("operator")
+        setRole("local_admin")
       } finally {
         setAuthLoading(false)
       }
@@ -76,7 +88,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
 
   const toggleRole = useCallback(() => {
     if (isAuthenticated) return
-    setRole((prev) => (prev === "admin" ? "operator" : "admin"))
+    setRole((prev) => (prev === "system_admin" ? "local_admin" : "system_admin"))
   }, [isAuthenticated])
 
   return (
@@ -85,8 +97,12 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         role,
         setRole,
         toggleRole,
-        isAdmin: role === "admin",
-        isOperator: role === "operator",
+        isSystemAdmin: role === "system_admin",
+        isDistrictManager: role === "district_manager",
+        isLocalAdmin: role === "local_admin",
+        isOperations: role === "operations",
+        isAdmin: role === "system_admin", // Backward compatibility
+        isOperator: role === "local_admin", // Backward compatibility
         isAuthenticated,
         authLoading,
       }}
