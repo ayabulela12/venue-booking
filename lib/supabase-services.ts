@@ -1,4 +1,4 @@
-import { getSupabaseClient } from "./supabase-client"
+import { createClient } from "@supabase/supabase-js"
 import { 
   transformVenues, 
   transformBookings, 
@@ -19,11 +19,16 @@ import type {
   AppState 
 } from "./types"
 
+// Use shared client to maintain auth session
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 // Supabase service functions for database operations
 
 // Venue operations
 export async function fetchVenues(): Promise<Venue[]> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('venues')
     .select('*')
@@ -34,7 +39,6 @@ export async function fetchVenues(): Promise<Venue[]> {
 }
 
 export async function createVenue(venue: Omit<Venue, 'id' | 'createdAt'>): Promise<Venue> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('venues')
     .insert({
@@ -56,7 +60,6 @@ export async function createVenue(venue: Omit<Venue, 'id' | 'createdAt'>): Promi
 }
 
 export async function updateVenue(venue: Venue): Promise<Venue> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('venues')
     .update(venue)
@@ -69,7 +72,6 @@ export async function updateVenue(venue: Venue): Promise<Venue> {
 }
 
 export async function deleteVenue(id: string): Promise<void> {
-  const supabase = getSupabaseClient()
   const { error } = await supabase
     .from('venues')
     .delete()
@@ -80,7 +82,6 @@ export async function deleteVenue(id: string): Promise<void> {
 
 // Booking operations
 export async function fetchBookings(): Promise<Booking[]> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('bookings')
     .select(`
@@ -99,7 +100,6 @@ export async function fetchBookings(): Promise<Booking[]> {
 }
 
 export async function createBooking(booking: Omit<Booking, 'id' | 'createdAt'>): Promise<Booking> {
-  const supabase = getSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   // Check for existing confirmed bookings at the same venue and time
@@ -150,8 +150,6 @@ export async function createBooking(booking: Omit<Booking, 'id' | 'createdAt'>):
 }
 
 export async function updateBooking(booking: Booking): Promise<Booking> {
-  const supabase = getSupabaseClient()
-  
   const bookingData = {
     venue_id: booking.venueId,
     title: booking.title,
@@ -184,7 +182,6 @@ export async function updateBooking(booking: Booking): Promise<Booking> {
 }
 
 export async function deleteBooking(id: string): Promise<void> {
-  const supabase = getSupabaseClient()
   const { error } = await supabase
     .from('bookings')
     .delete()
@@ -195,8 +192,6 @@ export async function deleteBooking(id: string): Promise<void> {
 
 // Trigger log operations
 export async function createTriggerLog(log: Omit<TriggerLog, 'id' | 'timestamp'>): Promise<TriggerLog> {
-  const supabase = getSupabaseClient()
-  
   const { data, error } = await supabase
     .from('trigger_logs')
     .insert({
@@ -212,7 +207,6 @@ export async function createTriggerLog(log: Omit<TriggerLog, 'id' | 'timestamp'>
 }
 
 export async function fetchTriggerLogs(): Promise<TriggerLog[]> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('trigger_logs')
     .select('*')
@@ -224,8 +218,6 @@ export async function fetchTriggerLogs(): Promise<TriggerLog[]> {
 
 // Override log operations
 export async function createOverrideLog(log: Omit<OverrideLog, 'id' | 'timestamp'>): Promise<OverrideLog> {
-  const supabase = getSupabaseClient()
-  
   const { data, error } = await supabase
     .from('override_logs')
     .insert({
@@ -241,7 +233,6 @@ export async function createOverrideLog(log: Omit<OverrideLog, 'id' | 'timestamp
 }
 
 export async function fetchOverrideLogs(): Promise<OverrideLog[]> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('override_logs')
     .select('*')
@@ -253,7 +244,6 @@ export async function fetchOverrideLogs(): Promise<OverrideLog[]> {
 
 // Parking area operations
 export async function fetchParkingAreas(): Promise<ParkingArea[]> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('parking_areas')
     .select('*')
@@ -265,7 +255,6 @@ export async function fetchParkingAreas(): Promise<ParkingArea[]> {
 
 // Road operations
 export async function fetchRoads(): Promise<Road[]> {
-  const supabase = getSupabaseClient()
   const { data, error } = await supabase
     .from('roads')
     .select('*')
@@ -277,7 +266,6 @@ export async function fetchRoads(): Promise<Road[]> {
 
 // Admin booking status actions
 export async function confirmBooking(bookingId: string): Promise<Booking> {
-  const supabase = getSupabaseClient()
   console.log("CONFIRM DEBUG: Attempting to confirm booking", { bookingId })
   
   // First get the booking to check conflicts
@@ -331,7 +319,6 @@ export async function confirmBooking(bookingId: string): Promise<Booking> {
 }
 
 export async function denyBooking(bookingId: string, reason: string): Promise<Booking> {
-  const supabase = getSupabaseClient()
   console.log("DENY DEBUG: Attempting to deny booking", { bookingId, reason })
   
   const { data, error } = await supabase
@@ -361,7 +348,6 @@ export async function denyBooking(bookingId: string, reason: string): Promise<Bo
 
 // Operator can cancel their own bookings
 export async function cancelBooking(bookingId: string, userId?: string): Promise<Booking> {
-  const supabase = getSupabaseClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   
   if (authError || !user) throw new Error("Unauthenticated")
@@ -392,8 +378,6 @@ export async function cancelBooking(bookingId: string, userId?: string): Promise
 
 // Real-time subscription functions
 export function subscribeToBookings(callback: (booking: Booking) => void) {
-  const supabase = getSupabaseClient()
-  
   return supabase
     .channel('bookings')
     .on('postgres_changes', 
@@ -402,7 +386,7 @@ export function subscribeToBookings(callback: (booking: Booking) => void) {
         schema: 'public', 
         table: 'bookings' 
       }, 
-      (payload) => {
+      (payload: any) => {
         if (payload.new) {
           callback(transformBooking(payload.new))
         }
@@ -412,8 +396,6 @@ export function subscribeToBookings(callback: (booking: Booking) => void) {
 }
 
 export function subscribeToVenues(callback: (venue: Venue) => void) {
-  const supabase = getSupabaseClient()
-  
   return supabase
     .channel('venues')
     .on('postgres_changes', 
@@ -422,21 +404,9 @@ export function subscribeToVenues(callback: (venue: Venue) => void) {
         schema: 'public', 
         table: 'venues' 
       }, 
-      (payload) => {
+      (payload: any) => {
         if (payload.new) {
-          const newVenue = payload.new as any
-          const venue: Venue = {
-            id: newVenue.id,
-            name: newVenue.name,
-            type: newVenue.type,
-            maxPopulation: newVenue.max_population,
-            ownerName: newVenue.owner_name,
-            ownerContact: newVenue.owner_contact,
-            address: newVenue.address,
-            image: newVenue.image,
-            createdAt: newVenue.created_at
-          }
-          callback(venue)
+          callback(transformVenue(payload.new))
         }
       }
     )
@@ -444,29 +414,20 @@ export function subscribeToVenues(callback: (venue: Venue) => void) {
 }
 
 export function subscribeToTriggerLogs(callback: (log: TriggerLog) => void) {
-  const supabase = getSupabaseClient()
-  
   return supabase
     .channel('trigger_logs')
     .on('postgres_changes', 
       { 
-        event: 'INSERT', 
+        event: '*', 
         schema: 'public', 
         table: 'trigger_logs' 
       }, 
-      (payload) => {
+      (payload: any) => {
         if (payload.new) {
-          const newLog = payload.new as any
-          const log: TriggerLog = {
-            id: newLog.id,
-            bookingId: newLog.booking_id,
-            type: newLog.type,
-            severity: newLog.severity,
-            message: newLog.message,
-            timestamp: newLog.timestamp,
-            resolved: newLog.resolved
+          const transformedLog = transformTriggerLogs([payload.new])
+          if (transformedLog.length > 0) {
+            callback(transformedLog[0])
           }
-          callback(log)
         }
       }
     )
@@ -474,8 +435,6 @@ export function subscribeToTriggerLogs(callback: (log: TriggerLog) => void) {
 }
 
 export function subscribeToOverrideLogs(callback: (log: OverrideLog) => void) {
-  const supabase = getSupabaseClient()
-  
   return supabase
     .channel('override_logs')
     .on('postgres_changes', 
@@ -484,18 +443,12 @@ export function subscribeToOverrideLogs(callback: (log: OverrideLog) => void) {
         schema: 'public', 
         table: 'override_logs' 
       }, 
-      (payload) => {
+      (payload: any) => {
         if (payload.new) {
-          const newLog = payload.new as any
-          const log: OverrideLog = {
-            id: newLog.id,
-            bookingId: newLog.booking_id,
-            operatorName: newLog.operator_name,
-            reason: newLog.reason,
-            conflicts: newLog.conflicts || [],
-            timestamp: newLog.timestamp
+          const transformedLog = transformOverrideLogs([payload.new])
+          if (transformedLog.length > 0) {
+            callback(transformedLog[0])
           }
-          callback(log)
         }
       }
     )

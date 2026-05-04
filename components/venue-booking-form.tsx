@@ -51,7 +51,7 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
     startTime: "09:00",
     endTime: "17:00",
     expectedAttendance: 100,
-    organizer: "",
+    organizer: "Test Operator", // Default for operators
     riskLevel: "low" as RiskLevel,
     amplifiedNoise: false,
     liquorLicense: false,
@@ -101,7 +101,13 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
   }, [formData.date, formData.startTime, formData.endTime, formData.expectedAttendance, formData.amplifiedNoise, formData.liquorLicense, calculatedRiskLevel, venue?.id, state.bookings, state.venues])
 
   async function handleSubmit() {
-    if (isSubmitting || conflicts.length > 0 || !formData.date) return
+    if (isSubmitting || conflicts.length > 0 || !formData.date || !formData.organizer.trim()) {
+      if (!formData.organizer.trim()) {
+        toast.error("Please enter an organizer name")
+        return
+      }
+      return
+    }
     
     setIsSubmitting(true)
     try {
@@ -124,14 +130,26 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
         startTime: "09:00",
         endTime: "17:00",
         expectedAttendance: 100,
-        organizer: "",
+        organizer: "Test Operator", // Default for operators
         riskLevel: "low",
         amplifiedNoise: false,
         liquorLicense: false,
       })
-    } catch (error) {
-      toast.error("Failed to create booking")
+    } catch (error: any) {
       console.error("Booking error:", error)
+      
+      // Show more specific error messages
+      if (error?.message?.includes('permission') || error?.message?.includes('42501')) {
+        toast.error("Permission denied. You may not have rights to create bookings.")
+      } else if (error?.message?.includes('duplicate') || error?.message?.includes('23505')) {
+        toast.error("This booking already exists or conflicts with another booking.")
+      } else if (error?.message?.includes('null') || error?.message?.includes('23502')) {
+        toast.error("Please fill in all required fields.")
+      } else if (error?.message?.includes('foreign key') || error?.message?.includes('23503')) {
+        toast.error("Invalid venue selected.")
+      } else {
+        toast.error(`Failed to create booking: ${error?.message || 'Unknown error'}`)
+      }
     } finally {
       setIsSubmitting(false)
     }

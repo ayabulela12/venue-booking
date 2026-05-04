@@ -3,7 +3,13 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 import type { Session } from "@supabase/supabase-js"
 import type { UserRole } from "@/lib/types"
-import { getSupabaseClient } from "@/lib/supabase-client"
+import { createClient } from "@supabase/supabase-js"
+
+// Use shared client instance to maintain auth session
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface RoleContextValue {
   role: UserRole
@@ -38,14 +44,13 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     async function init() {
       setAuthLoading(true)
       try {
-        const supabase = getSupabaseClient()
         const { data } = await supabase.auth.getSession()
         setIsAuthenticated(!!data.session)
         setRole(roleFromSession(data.session ?? null))
 
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange((_, session) => {
+        } = supabase.auth.onAuthStateChange((_event, session: Session | null) => {
           setIsAuthenticated(!!session)
           setRole(roleFromSession(session))
         })

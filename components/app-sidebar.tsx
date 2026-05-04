@@ -31,8 +31,14 @@ import { useRole } from "@/components/role-provider"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { UserRole } from "@/lib/types"
-import { getSupabaseClient } from "@/lib/supabase-client"
+import { createClient } from "@supabase/supabase-js"
 import { toast } from "sonner"
+
+// Use shared client to maintain auth session
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const navItems = [
   {
@@ -80,7 +86,6 @@ export function AppSidebar() {
   async function handleLogout() {
     setLoggingOut(true)
     try {
-      const supabase = getSupabaseClient()
       const { error } = await supabase.auth.signOut()
       if (error) {
         toast.error(error.message)
