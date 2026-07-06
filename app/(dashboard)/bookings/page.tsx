@@ -57,6 +57,7 @@ import { RISK_COLORS } from "@/lib/constants"
 import { BookingFormDialog } from "@/components/booking-form"
 import { BookingDetailSheet } from "@/components/booking-detail-sheet"
 import { cn } from "@/lib/utils"
+import { filterBookingsForUser } from "@/lib/booking-filters"
 import type { Booking, BookingStatus } from "@/lib/types"
 import { toast } from "sonner"
 
@@ -86,7 +87,7 @@ function formatTimeLabel(time: string) {
 
 export default function BookingsPage() {
   const { state, getVenueById, confirmBooking, denyBooking, cancelBooking, deleteBooking } = useStore()
-  const { isAdmin, isOperator } = useRole()
+  const { role, isAdmin, isLocalAdmin, isOperator, userId } = useRole()
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all")
   const [formOpen, setFormOpen] = useState(false)
@@ -96,12 +97,15 @@ export default function BookingsPage() {
   const [denyReason, setDenyReason] = useState("")
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
 
+  const roleScopedBookings = useMemo(
+    () =>
+      filterBookingsForUser(state.bookings, state.venues, { role, userId }),
+    [state.bookings, state.venues, role, userId]
+  )
+
   const filteredBookings = useMemo(() => {
-    return state.bookings
+    return roleScopedBookings
       .filter((b) => {
-        // Operator-specific: Show only operator's bookings
-        if (isOperator && b.organizer !== "Test Operator") return false
-        
         const venue = getVenueById(b.venueId)
         const matchesSearch =
           b.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -115,7 +119,7 @@ export default function BookingsPage() {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
-  }, [state.bookings, search, statusFilter, getVenueById, isOperator])
+  }, [roleScopedBookings, search, statusFilter, getVenueById])
 
   async function handleCancel(booking: Booking) {
     try {
@@ -181,13 +185,14 @@ export default function BookingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-balance">
-            {isOperator ? "My Bookings" : "Booking Management"}
+            {isLocalAdmin || isOperator ? "My Bookings" : "Booking Management"}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isOperator 
-              ? "View and manage your event bookings"
-              : "Create and manage event bookings with conflict detection"
-            }
+            {isLocalAdmin
+              ? "View and manage bookings you have created"
+              : isOperator
+                ? "View and manage your event bookings"
+                : "Create and manage event bookings with conflict detection"}
           </p>
         </div>
         {isAdmin && (

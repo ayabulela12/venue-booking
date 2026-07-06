@@ -58,7 +58,7 @@ export function VenueDetailSheet({
               <div className="flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-sm font-medium">
-                  {venue.maxPopulation.toLocaleString()}
+                  {venue.max_population?.toLocaleString() || 'N/A'}
                 </span>
               </div>
             </div>
@@ -71,12 +71,12 @@ export function VenueDetailSheet({
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 text-sm">
                 <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>{venue.ownerName}</span>
+                <span>{venue.owner_name}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  {venue.ownerContact}
+                  {venue.owner_contact}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm">
@@ -114,8 +114,7 @@ export function VenueDetailSheet({
                         {booking.title}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {format(parseISO(booking.date), "MMM d, yyyy")} |{" "}
-                        {booking.startTime}-{booking.endTime}
+                        {booking.date ? format(parseISO(booking.date), 'MMM dd, yyyy') : 'Date not set'} • {booking.date && booking.start_time ? format(parseISO(booking.date + ' ' + booking.start_time), 'HH:mm') : 'Time not set'} - {booking.date && booking.end_time ? format(parseISO(booking.date + ' ' + booking.end_time), 'HH:mm') : 'Time not set'}
                       </span>
                     </div>
                     <Badge
@@ -138,7 +137,7 @@ export function VenueDetailSheet({
           </div>
 
           <div className="text-xs text-muted-foreground/60 pt-2">
-            Added {format(parseISO(venue.createdAt), "MMM d, yyyy")}
+            Created on {venue.created_at ? format(parseISO(venue.created_at), 'MMM dd, yyyy') : 'Date not available'}
           </div>
         </div>
       </SheetContent>

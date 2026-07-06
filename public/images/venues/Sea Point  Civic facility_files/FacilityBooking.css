@@ -1,0 +1,257 @@
+﻿
+
+
+/*#calendar {
+    position: absolute;
+    top: 10px;
+    left: 5%;
+    background-color: white;
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+    padding: 30px;
+    z-index: 10000;
+    width:90%;
+  
+    
+   
+}*/
+
+.fc-timeline .fc-divider {
+
+    display:none;
+
+}
+
+.fc-scroller {
+
+    height:auto !important
+
+}
+
+
+#externalMapDivModal {
+    /*position: absolute;
+    top: 10px;
+    left: 5%;*/
+    background-color: white;
+    /*border-style: solid;
+    border-color: black;
+    border-width: 2px;*/
+    padding: 30px;
+    z-index: 10000;
+    width: 90%;
+    height:800px;
+
+}
+
+#externalMapDiv {
+    width: 100%;
+    height: 750px;
+}
+
+
+#closeMap {
+    float: right;
+    display: none;
+}
+
+.viewLinks {
+    display:inline;
+}
+
+
+.esriPopup .titlePane {
+    background-color: #2ea9d3 !important;
+    display: none; /*Hide title pane*/
+}
+
+.FeatureFacilityWheelchairAccess {
+    position: relative !important;
+    opacity: 100 !important;
+}
+.ActivityFacilityWheelchairAccess {
+    position: relative !important;
+    opacity: 100 !important;
+}
+
+.wheelchairAccess {
+    color: white !important;
+    font-weight: bold !important;
+}
+
+
+#HallsFeaturesResult {
+    display: none !important;
+}
+
+#HallsActivitiesResult {
+    display: none !important;
+}
+
+#HallsElectronicEquipmentResult {
+    display: none !important;
+}
+
+#HallsSecurityFeaturesResult {
+    display: none !important;
+}
+
+#ResortsFeaturesResult {
+    display: none !important;
+}
+
+#ResortsActivitiesResult {
+    display: none !important;
+}
+
+#ResortsElectronicEquipmentResult {
+    display: none !important;
+}
+
+#ResortsSecurityFeaturesResult {
+    display: none !important;
+}
+
+
+
+/*.select2 ol li:before, ul li:before {
+    content: "" !important;
+    position: absolute;
+    left: 0;
+    font-size: 15px;
+}*/
+
+.select2-container--default .select2-selection--single .select2-selection__choice {
+    margin-right: 5px !Important;
+    margin-top: 5px !Important;
+    padding: 0 5px !Important;
+    margin-bottom: 0px !Important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    box-sizing: border-box !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 5px !important;
+}
+
+
+.select2-container--default .select2-selection--single {
+    height: 50px !important;
+    padding-top: 10px;
+}
+
+
+.bootstrap-datetimepicker-widget .table-condensed {
+    margin-bottom: 5px !Important;
+}
+
+
+.list-figure-item figure {
+    width: 150px;
+}
+
+
+.bootstrap-datetimepicker-widget {
+    background-color:white;
+}
+
+
+
+.map-pin {
+    background-position: -62px -160px;
+    width: 30px;
+    height: 42px;
+    margin-right: 10px;
+    margin-bottom: 0;
+    top: 10px;
+}
+
+
+.card.vertical figure {
+    min-height: 310px !important;
+    height: auto !important;
+}
+
+
+.facilitySearchCriteria {
+    display:inline;
+    background-color:white;
+
+}
+
+.facilitySearchCriteriaDiv {
+    width: 100%;
+    border-bottom: 0px !important;
+    position: relative;
+    background-color: white;
+    padding: 0px 0 0 40px;
+}
+
+
+    .facilitySearchCriteriaDiv:after {
+        content: "";
+        width: 100%;
+        height: 100%;
+        display: block;
+        position: absolute;
+        right: -100%;
+        top: 0;
+        background: #fff;
+        border-bottom: 1px solid #cdd2d4;
+        box-sizing: content-box;
+    }
+
+/*Hide email on details page*/
+#contactDetailCalendar a[href^=mail] {
+    display: none;
+}
+/* 
+#cancelbutton {
+
+    width:49%;
+}
+
+#bookbutton {
+
+    width:49%;
+} */
+
+
+
+
+.fc-today-button .fc-next-button .fc-prev-button .fc-timeline .fc-month-button .fc-listWeek-button {
+    margin-right: 10px !important;   
+}
+
+.fc-next-button .fc-month-button .fc-listWeek-button {
+    margin-bottom: 0px !important;
+}
+
+.fc-toolbar .btn {
+    margin-left: 5px !important;
+}
+
+.btn.disabled, .btn:disabled {
+    pointer-events: none;
+    background-color: #bacad3 !important;
+    cursor: default;
+    opacity:   1 !important;
+}
+
+.sorting_1 {
+
+    padding-top: 0px !important;
+    padding-bottom: 10px  !important;
+}
+
+
+.mb-3, .my-3 {
+    margin-bottom: 0rem!important;
+}
+
+td.sorting_1:first-child {
+
+    padding-top: 10px !important;
+}

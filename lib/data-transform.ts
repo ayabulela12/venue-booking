@@ -11,7 +11,11 @@ export function transformVenue(venue: any): Venue {
     ownerName: venue.owner_name,
     ownerContact: venue.owner_contact,
     address: venue.address,
+    aboutVenue: venue.about_venue,
+    features: venue.features || [],
+    activities: venue.activities || [],
     image: venue.image,
+    municipality: venue.municipality,
     createdAt: venue.created_at
   }
 }
@@ -42,7 +46,8 @@ export function transformBooking(booking: any): Booking {
     overriddenBy: booking.overridden_by,
     overriddenAt: booking.overridden_at,
     createdBy: booking.created_by,
-    createdAt: booking.created_at
+    createdAt: booking.created_at,
+    municipality: booking.municipality,
   }
 }
 

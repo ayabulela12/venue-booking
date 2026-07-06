@@ -1,0 +1,409 @@
+﻿var VenueSelected = "";
+var ResortSelected = "";
+var CapacitySelected = "";
+var startDate = "";
+var startTime = "";
+var endDate = "";
+var endTime = "";
+var checkInDate  = "";
+var checkOutDate  = "";
+
+
+var findVenueJS = function() {
+
+this.prepareFindVenue = function() {
+
+$(document).ready(function () {
+
+    /*$('a[href^=mailto]').addClass('mailbox');
+    $('.mailbox').click(function () {
+
+        $('.mailbox').css('display', 'none');
+        console.log("function triggered");
+
+        });*/
+
+	//Mobile Search Toggle
+	$('#btnMobileSearch').click(function(){
+		$('#searchTabContainer').toggle();
+		$('#searchContainer').toggle();
+		if($('#searchTabContainer').is(':visible')){
+			$(this).addClass('active');
+			$(this).find('i').addClass('fa-remove');
+		}else{
+			$(this).removeClass('active');
+			$(this).find('i').removeClass('fa-remove');
+		}
+    });
+
+    $(".find-header-row").prepend($(".mobile-search-btn-cnt"));
+	
+	//Search results Search and Filter Toggle
+	$('#btnMobileSearchResult').click(function(){
+		// alert('Test');
+		$('#searchTabContainer').toggle();
+        $('#searchResultContainer').toggle();
+        $('#searchContainer').toggle();
+		if($('#searchTabContainer').is(':visible')){
+			$(this).addClass('active');
+			$(this).find('i').addClass('fa-remove');
+		}else{
+			$(this).removeClass('active');
+			$(this).find('i').removeClass('fa-remove');
+		}
+	});
+	$('#btnMobileFilterResult').click(function(){
+		 	
+		if($('#filterContainer').hasClass('hide')){
+			$(this).find('i').removeClass('fa-sliders');
+			$(this).addClass('active');
+			$(this).find('i').addClass('fa-remove');
+			$('#filterContainer').removeClass('hide');
+		}else{
+			$(this).find('i').addClass('fa-sliders');
+			$(this).removeClass('active');
+			$(this).find('i').removeClass('fa-remove');
+			$('#filterContainer').addClass('hide');
+		}
+	});
+	
+	//Page 1 tab click
+	$('#btnHalls').click(function(){
+		$('.tab-cnt .btn').removeClass('active');
+		$(this).addClass('active');
+		
+		$('#currentTabText').text('venue');
+		
+		$('#resortContainer').addClass('hide');
+		$('#venueContainer').removeClass('hide');
+	});
+	
+	$('#btnResorts').click(function(){
+		$('.tab-cnt .btn').removeClass('active');
+		$(this).addClass('active');
+		
+		$('#currentTabText').text('resort'); 
+		
+		$('#venueContainer').addClass('hide');
+		$('#resortContainer').removeClass('hide');
+	});
+	
+	
+	
+    try {
+        $("#venueSearch").select2({
+            placeholder: "Search by venue name",
+            theme: "bootstrap",
+            matcher: matchCustom,
+            templateResult: formatCustom,
+            width: 'resolve',
+            multiple: false,
+            dropdownParent: $('#venueContainer div.col-9 > div')   
+            //minimumResultsForSearch: -1
+        }).data('select2').$dropdown.addClass('custom-search');
+
+		$('#venueSearch').on("change", function(){
+			VenueSelected = $(this).val();
+		   });
+
+        //$('#venueSearch').select2().data('select2').$dropdown.addClass('custom-search');
+
+
+        $("#resortSearch").select2({
+            placeholder: "Search by resort name",
+            theme: "bootstrap",
+            matcher: matchCustom,
+            templateResult: formatCustom,
+            width: 'resolve',
+            multiple: false,
+            dropdownParent: $('#resortContainer div.col-12 > div')
+            //minimumResultsForSearch: -1
+        }).data('select2').$dropdown.addClass('custom-search');
+
+		$('#resortSearch').on("change", function(){
+			ResortSelected = $(this).val();
+		   });
+        //$('#resortSearch').select2().data('select2').$dropdown.addClass('custom-search');
+
+
+    } catch (error) {
+        console.log(error);
+    }
+	
+	
+	function stringMatch(term, candidate) {
+		return candidate && candidate.toLowerCase().indexOf(term.toLowerCase()) >= 0;
+	}
+
+	function matchCustom(params, data) {
+		// If there are no search terms, return all of the data
+		if ($.trim(params.term) === '') {
+			return data;
+		}
+		// Do not display the item if there is no 'text' property
+		if (typeof data.text === 'undefined') {
+			return null;
+		}
+		// Match text of option
+		if (stringMatch(params.term, data.text)) {
+			return data;
+		}
+		// Match attribute "data-foo" of option
+		if (stringMatch(params.term, $(data.element).attr('data-foo'))) {
+			return data;
+		}
+		// Return `null` if the term should not be displayed
+		return null;
+	}
+
+	function formatCustom(state) {
+		return $(
+			'<div class="search-filter-item"><div class="venue-name">' + state.text + '</div><div class="venue-address">'
+				+ $(state.element).attr('data-foo')
+				+ '</div></div>'
+		);
+	}
+	
+	
+	//Date pickers
+	$('#startDate, #endDate, #checkInDate, #checkOutDate').datetimepicker({
+	    useCurrent: false,
+		locale: 'eu',
+		minDate: moment(moment.now()).format("YYYY-MM-DD"),
+        format: "DD/MM/YYYY",
+        inline: true,
+		icons: {
+			time: "fa fa-clock-o",
+			date: "fa fa-calendar",
+			up: "fa fa-arrow-up",
+			down: "fa fa-arrow-down",
+			next: "fa fa-arrow-right",
+			previous: "fa fa-arrow-left",
+			today: 'fa fa-screenshot',
+			clear: 'fa fa-trash',
+			close: 'fa fa-remove'
+        }
+    });
+
+	
+
+    // Start and End date icon bindings
+    $('#startDate').nextAll('span:first').click(function () {
+        $("#startDate").focus();
+    });
+
+    $('#endDate').nextAll('span:first').click(function () {
+        $("#endDate").focus();
+    });
+
+    // Checkin and Checkout date icon bindings
+    $('#checkInDate').nextAll('span:first').click(function () {
+        $("#checkInDate").focus();
+    });
+
+    $('#checkOutDate').nextAll('span:first').click(function () {
+        $("#checkOutDate").focus();
+    });
+
+    // Hide from starting render
+    $('#startDate, #endDate, #checkInDate, #checkOutDate').data("DateTimePicker").hide();
+    $('#endDate').data("DateTimePicker").hide();
+
+    $('#checkInDate').data("DateTimePicker").hide();
+    $('#checkOutDate').data("DateTimePicker").hide();
+
+   /* $("#startDate").on("dp.change", function (e) {
+        $('#endDate').data("DateTimePicker").minDate(e.date);
+    });*/
+
+	
+	//Capacity
+	$("#capacity").select2({
+		minimumResultsForSearch: -1,
+		placeholder: "Select an option",
+        theme: "bootstrap",
+        dropdownParent: $('#venueContainer > div:nth-child(1) > div:nth-child(2) > div')
+	});
+
+	$('#capacity').on("change", function(){
+		CapacitySelected = $(this).val();
+	   });
+	
+	
+	//Start time
+	function populate(selector) {
+		var select = $(selector);
+		var hours, minutes, ampm;
+	   // for (var i = 0; i <= 1450; i += 60) {
+		for (var i = 660; i <= 1390; i += 60) {
+			hours = Math.floor(i / 60);
+			minutes = i % 60;
+			if (minutes < 10) {
+				minutes = '0' + minutes; // adding leading zero to minutes portion
+			}
+			select.append($('<option></option>')
+			.attr('value', hours)
+			.text(hours + ':' + minutes));
+
+		}
+	}
+	
+	//End time
+	function populate2(selector) {
+		var select = $(selector);
+		var hours, minutes, ampm;
+	   // for (var i = 0; i <= 1450; i += 60) {
+		for (var i = 0; i <= 1390; i += 60) {
+			hours = Math.floor(i / 60);
+			minutes = i % 60;
+			if (minutes < 10) {
+				minutes = '0' + minutes; // adding leading zero to minutes portion
+			}
+			//add the value to dropdownlist
+			select.append($('<option></option>')
+				.attr('value', hours)
+				.text(hours + ':' + minutes));
+		}
+		console.log('Start time  populated set');
+	}
+	
+	// populate('#startTime');
+	// populate2('#endTime');
+	
+	$("#startTime").select2({
+		minimumResultsForSearch: -1,
+		placeholder: "Start time",
+        theme: "bootstrap",
+        dropdownParent: $('#venueContainer > div:nth-child(2) > div:nth-child(3) > div')
+	});
+	$("#endTime").select2({
+		minimumResultsForSearch: -1,
+		placeholder: "End time",
+        theme: "bootstrap",
+        dropdownParent: $('#venueContainer > div:nth-child(2) > div:nth-child(4) > div')
+	});
+	
+
+
+
+	//Filter button
+    $("#filterBtn").addClass("filterBtn-color");
+	$("#filterBtn").click(function(){
+		if($("#filterContainer").hasClass("hide")){
+			$(this).find('i').removeClass("fa-angle-down");
+			$(this).find('i').addClass("fa-angle-up");
+            $("#filterContainer").removeClass("hide");
+            $("#filterBtn").removeClass("filterBtn-color");
+		}else{
+			$(this).find('i').addClass("fa-angle-down");
+			$(this).find('i').removeClass("fa-angle-up");
+            $("#filterContainer").addClass("hide");
+            $("#filterBtn").addClass("filterBtn-color");
+		}
+	});
+
+
+
+    $('select2-results__option').removeClass("select2-results__option--highlighted");
+
+    //Esri Popup Wrapper
+    /*$(document).mouseup(function (e) {
+        var container = $(".esriPopup");
+
+        if (!container.is(e.target) && container.has(e.target).length === 0) {
+
+            container.fadeOut();
+
+        }
+    });*/
+
+    $(document).mouseup(function (e) {
+        //Map popup
+        var container = $(".esriPopup");
+        if ($(e.target).is("image")) {
+            container.fadeIn();
+        } else {
+            if (!container.is(e.target) && container.has(e.target).length === 0) {
+                container.fadeOut 
+            }
+        }
+
+    }); 
+});
+
+}
+}
+
+function getVenueName() {
+
+	return $('#venueSearch').val();
+	
+	}
+
+	function getWheelchair() {
+
+
+		return $('#Hallsfacilitywheelchairaccess').is(":checked")
+	}
+
+
+
+
+   function getCapacity() {
+
+	return $('#capacity').val();
+	
+	}
+
+function getStartDate() {
+
+return $('#startDate').val();
+
+}
+
+function getEndDate() {
+
+	return $('#endDate').val();
+	
+	}
+
+function getStartTime() {
+
+	return $('#startTime').val();
+	
+	}
+
+
+	
+function getEndTime() {
+
+	return $('#endTime').val();
+	
+	}
+
+
+function getResortName() {
+
+		return $('#resortSearch').val();
+	}
+
+function getResortStartDate() {
+
+		return $('#checkInDate').val();
+		
+		}
+		
+function getResortEndDate() {
+		
+			return $('#checkOutDate').val();
+			
+			}
+
+function getResortWheelchair() {
+
+	return $('#resortsWheelchairaccess').is(":checked")
+
+}
+
+
+

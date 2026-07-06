@@ -1,0 +1,1471 @@
+
+/* added by saleem*/
+
+.bootstrap-datetimepicker-widget ul li:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    font-size: 15px;
+}
+
+.contentPane {
+    color: #2ea9d3 !important;
+    font-weight: 600 !important;
+    padding: 6px 6px 4px 6px !important;
+    margin-bottom: 0;
+    font-style: normal;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /* font family font-size: 14px;*/
+}
+
+#ContactDetailsDiv {
+    line-height: 30px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#ContactDetailsDiv a {
+    line-height: 24px;
+    font-size: 16px;
+    }
+
+/*Hide email address*/
+#ContactDetailsDiv a[href^=mailto] {
+    display: none;
+}
+
+.divcaldatespan {
+    font-size: 24px;
+}
+
+.fc-list-heading td {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.fc-list-item-title {
+    font-weight: 500;
+}
+
+.fc-toolbar button {
+    font-size: 14px;
+    min-width: 40px;
+}
+    
+input #cancelbutton {
+    width: 100%;
+}
+
+/*end added saleem*/ 
+
+.hide {
+    display: none !important;
+}
+
+@media only screen and (max-width: 700px) {
+        .col-12 {
+        width: 100%;
+        border-bottom: 1px solid #cdd2d4;
+    }
+
+}
+    .col-12 {
+        width: 100%;
+    }
+
+div.container.m-t-20.list-cnt > div > div{
+    border-bottom: none;
+}
+
+#resortContainer > div:nth-child(1) > div {
+    border-bottom: none;
+}
+
+    .col-11 {
+        width: 91.66%;
+    }
+
+    .col-10 {
+        width: 83.33%;
+    }
+
+    .col-9 {
+        width: 75%;
+    }
+
+    .col-8 {
+        width: 66.66%;
+    }
+
+    .col-7 {
+        width: 58.33%;
+    }
+
+    .col-6 {
+        width: 50%;
+    }
+
+    .col-5 {
+        width: 41.66%;
+    }
+
+    .col-4 {
+        width: 33.33%;
+    }
+
+    .col-3 {
+        width: 25%;
+    }
+
+    .col-2 {
+        width: 16.66%;
+    }
+
+    .col-1 {
+        width: 8.33%;
+    }
+
+    .m-t-30 {
+        margin-top: 30px;
+    }
+
+    .m-t-25 {
+        margin-top: 25px;
+    }
+
+    .m-t-20 {
+        margin-top: 20px;
+    }
+
+    .m-t-15 {
+        margin-top: 15px;
+    }
+
+    .m-t-10 {
+        margin-top: 10px;
+    }
+
+    .m-t-5 {
+        margin-top: 5px;
+    }
+
+    .m-t-0 {
+        margin-top: 0px;
+    }
+
+    .m-b-30 {
+        margin-bottom: 30px;
+    }
+
+    .m-b-25 {
+        margin-bottom: 25px;
+    }
+
+    .m-b-20 {
+        margin-bottom: 20px;
+    }
+
+    .m-b-15 {
+        margin-bottom: 15px;
+    }
+
+    .m-b-10 {
+        margin-bottom: 10px;
+    }
+
+    .m-b-5 {
+        margin-bottom: 5px;
+    }
+
+    .p-t-30 {
+        padding-top: 30px !important;
+        margin-bottom: 30px;
+    }
+
+    .p-t-25 {
+        padding-top: 25px;
+    }
+
+    .p-t-20 {
+        padding-top: 20px;
+    }
+
+    .p-t-15 {
+        padding-top: 15px;
+    }
+
+    .p-t-10 {
+        padding-top: 10px;
+    }
+
+    .p-t-5 {
+        padding-top: 5px;
+    }
+
+    .text-align-left {
+        text-align: left;
+    }
+
+    .text-align-center {
+        text-align: center;
+    }
+
+    .text-align-right {
+        text-align: right;
+    }
+
+    /*  .card figure {
+    margin: 0;
+}*/
+
+    figure img {
+        max-width: 100%;
+    }
+
+    .find-header-row h1,
+      .find-header-row h1 {
+        /*line-height: 100%;*/
+        margin-bottom: 20px; /*H1 Line height from global*/
+        margin-top: 20px;
+    }
+
+@media only screen and (min-width: 700px) {
+    .find-header-row h1,   .find-header-row h1 {
+        /*line-height: 100%;*/
+        margin-bottom: 20px; /*H1 Line height from global*/
+      /*  margin-top: 10px;  */
+    }
+}
+
+#btnResorts {
+    margin-top: 0px !important;
+}
+
+    @media only screen and (min-width: 700px) {
+        #btnResorts {
+            margin-left: 10px !important;
+        }
+    }
+
+    /*.search-result-title-cnt{
+    padding-top: 10px;
+    padding-bottom:20px;
+}*/
+
+    .search-result-count {
+        padding-top: 20px;
+        padding-bottom: 15px;
+        border-top: 1px solid #cdd2d4;
+        border-bottom: 1px solid #cdd2d4;
+    }
+
+      .card figure a,
+      .card figure a:hover {
+        text-decoration: none;
+        color: #fff;
+    }
+
+          .card figure a.cc-font-navy,
+          .card figure a.cc-font-navy:hover {
+            color: #2488aa !important;
+        }
+
+      .breadcrumb ul li:first-child {
+        margin-left: 0;
+    }
+
+    /*  h1{
+	margin-bottom:30px;
+}*/
+
+    /*.bg-white .col-12 h1{
+    margin: 0 0 20px !important; 
+}*/
+
+    .tab-cnt .btn {
+        background-color: #2ea9d3 !important;
+        border-radius: 2px 2px 0 0 !important;
+    }
+
+        /*.tab-cnt .btn.icon-right {
+        margin-left: 10px !important
+    }*/
+
+        .tab-cnt .btn.active,
+        .tab-cnt .btn:hover {
+            background-color: #3c7b99 !important;
+        }
+
+    /*  .bg-darker-grey{
+    background-color: #424242 !important;
+}*/
+
+    .search-facility-section .bg-darker-grey {
+        background-color: #424242 !important;
+    }
+
+
+    #searchContainer {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    #searchResultContainer {
+        padding-top: 40px;
+        padding-bottom: 20px;
+    }
+
+    .bg-charcoal-grey {
+        background-color: #2e3235;
+    }
+
+    #filterContainer {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+        #filterContainer > div:nth-child(2) > div {
+            border-bottom: none;
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    #searchContainer .row:last-child .form-group {
+        margin-bottom: 0;
+    }
+
+    /*  fieldset{
+    padding:0 !important;
+}*/
+
+      fieldset p.selectors {
+        margin-bottom: 0;
+    }
+
+      fieldset .selectors label {
+        padding-top: 4px;
+    }
+
+    .featured-item-description {
+        min-height: 80px;
+    }
+
+    .hide-overflow {
+        overflow: hidden;
+    }
+
+    .form-group label {
+        color: #fff;
+        font-size: 14px;
+        line-height: 1.4em;
+        font-weight: 500;
+    }
+
+    .form-group .input-group-addon {
+        position: absolute;
+        top: 38px;
+        right: 9px;
+        color: #999;
+    }
+
+    .form-control {
+        display: block;
+        width: 100%;
+        background-color: #fff !important;
+        border: 1px solid #e2e5e7 !important;
+        border-radius: 2px !important;
+        padding: 10px !important;
+        height: 50px;
+        line-height: 1.5 !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+    }
+
+        .form-control::placeholder {
+            font-size: 14px;
+            color: #757575;
+            opacity: 1;
+        }
+
+    .fa-calendar {
+        cursor: pointer;
+    }
+
+    .select2-container--bootstrap .select2-selection--single .select2-selection__placeholder {
+        color: #757575;
+    }
+
+    .select2-container--bootstrap .select2-selection--single {
+        height: 50px !important;
+        padding: 10px 24px 10px 10px;
+        line-height: 2;
+    }
+
+    .select2-results__options {
+        list-style: none;
+        margin: 0;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .select2-selection__rendered {
+        margin: 0 !important;
+    }
+
+    .select2-search.select2-search--inline {
+        padding: 6px 0 !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+        .select2-search.select2-search--inline .select2-search__field {
+            width: 100% !important;
+        }
+
+    .select2-search__field {
+        border-style: none !important;
+        background-color: white !important;
+    }
+
+      .select2-search__field {
+        border-style: none !important;
+        background-color: white !important;
+        border-radius: 2px;
+    }
+
+    .select2-container .select2-selection--single {
+        height: 45px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        top: 10px;
+    }
+
+    .custom-search.select2-container--bootstrap .select2-dropdown {
+        /*position: absolute;*/
+        top: -60px;
+        border-top: none !important;
+        padding-top: 3px;
+    }
+
+
+    #startDate,
+    #endDate {
+        border-radius: 2px;
+    }
+
+    .datepicker table tr th {
+        border-color: #c9d6dd;
+    }
+
+    /* Date picker */
+
+    .bootstrap-datetimepicker-widget {
+        background-color: #eff3f6;
+        border: 2px solid rgb(46, 169, 211);
+        width: 100% !important;
+        position: relative;
+        top: 2px !important;
+        z-index: 1000;
+        font-size: 14px;
+        border-radius: 2px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+        background-clip: padding-box;
+        margin-top: 10px;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .bootstrap-datetimepicker-widget {
+            background-color: #eff3f6;
+            border: 2px solid rgb(46, 169, 211);
+            /*width: 224px !important;*/
+            width: 100% !important;
+            position: absolute;
+            top: auto !important;
+            z-index: 1000;
+            font-size: 14px;
+            border-radius: 2px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+            background-clip: padding-box;
+            margin-top: 10px;
+        }
+    }
+
+
+    .bootstrap-datetimepicker-widget ul {
+        margin: 0 !important;
+    }
+
+    .bootstrap-datetimepicker-widget li {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+
+    .bootstrap-datetimepicker-widget ol li:before, ul li:before {
+        content: " ";
+        position: absolute;
+        left: 0;
+        font-size: 15px;
+    }
+
+
+    .bootstrap-datetimepicker-widget table {
+        border: none;
+        margin: 0 !important;
+    }
+
+    .bootstrap-datetimepicker-widget th,
+    .bootstrap-datetimepicker-widget td {
+        padding: 5px !important;
+        /*background-color: transparent !important;
+    border: none !important;*/
+        font-size: 14px;
+        background: none;
+    }
+
+        .bootstrap-datetimepicker-widget td.day:hover {
+            background-color: #cdcdcd;
+        }
+
+
+    .bootstrap-datetimepicker-widget table td.active, .bootstrap-datetimepicker-widget table td.active:hover {
+        background-color: #2488aa;
+        border-radius: 0;
+    }
+
+    .mobile-search-btn-cnt {
+        display: none !important;
+        padding: 10px;
+        border-top: 1px solid #cdd2d4;
+        border-bottom: 1px solid #cdd2d4;
+    }
+
+    /* #searchContainer,
+    #searchTabContainer,
+    #searchResultContainer {
+        display: block;
+    } */
+
+
+
+
+    @media only screen and (max-width: 700px) {
+        .select2-container {
+            width: 100% !important;
+            padding-bottom: 10px;
+            position: relative !important;
+            top: auto !important;
+        }
+    }
+
+    .select2-container {
+        width: 100% !important;
+        padding-bottom: 10px;
+    }
+
+
+    .select2-results__option {
+        list-style: none;
+        font-size: 14px;
+        margin: 0;
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+        line-height: 100%;
+    }
+
+        .select2-results__option::before {
+            content: '' !important;
+        }
+
+     .accordion.dl {
+        position: relative;
+    }
+
+    .accordion .dt {
+        font-size: 14px;
+        min-height: 45px;
+    }
+
+        /* .accordion .dt a{
+	font-size:14px;
+	border:1px solid #ababab;
+	border-radius:4px;
+	min-height:45px;
+	padding: 15px 40px 10px 15px;
+}*/
+
+        /*Updated - 13-08-2019*/
+       .accordion .dt a {
+            border: 1px solid #2ea9d3 !important;
+            border-bottom-width: 0 !important;
+        }
+
+    .bootstrap-datetimepicker-widget.dropdown-menu {
+        margin-top: 10px !important;
+    }
+
+ .accordion .dd {
+        position: relative;
+        width: 100%;
+        z-index: 9999;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .accordion .dd {
+            position: absolute;
+            width: 100%;
+            z-index: 9999;
+        }
+    }
+
+    /*#acc div.dd{
+    max-height:270px;
+}*/
+
+    /*Updated - 13-08-2019*/
+    #acc div.dd {
+        max-height: 270px;
+        overflow-y: scroll;
+        border: 1px solid #2ea9d3 !important;
+    }
+
+    /*#acc div.dd fieldset{
+    border: 2px solid #2ea9d3 !important;
+    height: auto !important;
+}*/
+
+    /*Updated - 13-08-2018 - Hide scrollbar but allow scrolling*/
+    .dd::-webkit-scrollbar {
+        width: 0px;
+        /* Remove scrollbar space */
+        background: transparent;
+        /* Optional: just make scrollbar invisible */
+    }
+
+    /* Optional: show position indicator*/
+
+    .dd::-webkit-scrollbar-thumb {
+        background: #FF0000;
+    }
+
+      .filter .label-text {
+        padding: 10px 47px 11px 15px;
+        font-size: 14px;
+    }
+
+      .clear-filter {
+        background-color: transparent;
+        padding: 20px 0;
+        text-align: right;
+    }
+
+          .clear-filter .btn {
+            width: auto;
+            margin-bottom: 0;
+            float: none;
+            margin-left: 10px;
+        }
+
+      #filterBtn {
+        color: #2ea9d3;
+        background-color: #2e3235;
+        min-width: 150px;
+        padding: 5px 15px;
+        font-weight: 600;
+        right: 25px;
+        position: absolute;
+        text-align: center;
+        font-size: 18px;
+        z-index: 100;
+        top: 0;
+    }
+
+          #filterBtn:hover {
+            text-decoration: none;
+        }
+
+    #btnMobileSearchResult,
+    #btnMobileFilterResult {
+        display: none !important;
+    }
+
+    .item-counter {
+        font-size: 22px;
+        line-height: 1.19;
+        position: relative;
+        top: 5px;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .item-counter {
+            font-size: 26px;
+            line-height: 1.19;
+            position: relative;
+            top: 5px;
+        }
+    }
+
+    #externalMapDiv {
+        position: relative;
+        top: -10px; /*Updated - 13-08-2019*/
+        padding: 0;
+        /*border-radius: 2px;*/
+        margin-bottom: -11px !important;
+    }
+
+
+    /*Loading Indicator*/
+    .loadingIndicator {
+        display: block;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: rgba( 255, 255, 255, .8 ) url('../../assets/images/LoadingIndicator.gif') 50% 50% no-repeat;
+    }
+
+    /* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+    body.loading .loadingIndicator {
+        overflow: hidden;
+    }
+
+    /* Anytime the body has the loading class, our
+   loadingIndicator element will be visible */
+    body.loading .loadingIndicator {
+        display: block;
+    }
+
+    /*Map Container*/
+    .p-t-30.loading .loadingIndicator {
+        overflow: hidden;
+    }
+
+    /* Anytime the body has the loading class, our
+   loadingIndicator element will be visible */
+
+    .p-t-30.loading .loadingIndicator {
+        display: block;
+    }
+
+    /*END*/
+
+      .list-figure-item p {
+        padding: 0 !important;
+        line-height: 28px;
+    }
+
+    .esriPopup {
+        z-index: 999;
+    }
+
+    @media only screen and (min-width: 1000px) {
+        .m-b-20 {
+            padding-left: 15px;
+        }
+    }
+
+    .mobile-only {
+        display: none;
+    }
+
+    /*Updated - 13-08-2019 - Facility Item Alignment*/
+    .locAlign {
+        margin-left: 38px;
+        margin-top: -25px;
+    }
+
+    .contactAlign {
+        margin-left: 39px;
+        margin-top: 2px;
+    }
+
+    #CA-btn-top {
+        top: auto;
+        display: none;
+    }
+
+    #CA-btn-bottom {
+        display: block;
+        /*margin-bottom: 0px;*/
+        margin-top: 10px;
+    }
+
+    #NoResult {
+        position: relative;
+        top: -25px;
+    }
+
+    #NoResult,
+    #popularItemsSearch {
+        max-width: 1000px;
+        /* padding-left: 30px !important;*/
+        padding-right: 30px !important;
+        margin: 0 auto !important;
+    }
+
+    /*.section-pull {
+    padding: 0 !important;
+}*/
+
+    @media only screen and (min-width: 800px) {
+        #CA-btn-top {
+            display: block;
+            top: auto;
+            right: 15px;
+        }
+
+        #CA-btn-bottom {
+            display: none !important;
+        }
+    }
+
+
+
+    .btnPosition {
+        margin-top: 0;
+        float: none !Important;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .btnPosition {
+            margin-top: -130px;
+        }
+    }
+
+    /*Control container - Updated-13-08-2019*/
+    @media only screen and (max-width: 700px) {
+        .m-t-20 {
+            padding-left: 5px !Important;
+            padding-right: 5px !Important;
+        }
+    }
+
+    /*Toggle Map Button*/
+    /*@media only screen and (min-width: 700px) {
+    .btn-float-map {
+        top: 25px !important;
+    }
+}*/
+
+    .btn-float-map {
+        position: relative;
+        z-index: 999;
+        top: 45px;
+        left: 80px;
+        float: left;
+        width: auto !important;
+        padding: 15px 10px !important;
+        top: 25px !important;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .btn-float-map {
+            top: 25px !important;
+            padding: 13px 20px !important;
+        }
+    }
+
+
+    /*List and map buttons*/
+
+    .btn-show-list {
+        height: 40px;
+        width: 40px !important;
+        min-width: 40px !important;
+        padding-top: 10px !important;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .btn-show-list {
+            height: 40px;
+            width: 40px !important;
+            min-width: 40px !important;
+            margin-left: 0 !important;
+        }
+    }
+
+    .list-facility {
+        background-position: -181px -185px !important;
+        background-repeat: no-repeat;
+        overflow: hidden;
+        display: block;
+        width: 20px;
+        height: 20px;
+        zoom: 1.2;
+        margin: 0 !important;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .list-facility {
+            background-image: url(../../assets/images/global.png) !important;
+            background-position: -182px -183px !important;
+            background-repeat: no-repeat;
+            overflow: hidden;
+            display: block;
+            width: 20px;
+            height: 20px;
+            zoom: 1.2;
+            margin: -2px 15px 0px -10px !important;
+        }
+    }
+
+    .btn-show-map {
+        height: 40px;
+        width: 40px !important;
+        min-width: 40px !important;
+        margin: 0 !important;
+        padding-top: 10px !important;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .btn-show-map {
+            height: 40px;
+            width: 40px !important;
+            min-width: 40px !important;
+            margin-left: 0 !important;
+        }
+    }
+
+    .map-facility {
+        background-image: url(../../assets/images/global.png) !important;
+        background-position: -216px -183px;
+        background-repeat: no-repeat;
+        overflow: hidden;
+        display: block;
+        width: 20px;
+        height: 20px;
+        zoom: 1.2;
+        margin: 0 !important;
+    }
+
+    @media only screen and (min-width: 700px) {
+        .map-facility {
+            background-image: url(../../assets/images/global.png) !important;
+            background-position: -220px -182px;
+            background-repeat: no-repeat;
+            overflow: hidden;
+            display: block;
+            width: 20px;
+            height: 20px;
+            zoom: 1.2;
+            margin: -2px 15px 0px -6px !important;
+        }
+    }
+    /*Content Pane Button*/
+    .contentPane a.btn {
+        width: 100%;
+    }
+
+    /*Content Pane - Pin Popup*/
+    .contentPane a {
+        color: #fff !important;
+        text-decoration: none !important;
+        margin-bottom: 0 !important;
+        margin-top: 8px;
+        padding: 12px 0 !important;
+    }
+
+    .contentPane {
+        color: #2ea9d3 !important;
+        font-weight: 600 !important;
+        padding: 6px 6px 4px 6px !important;
+        margin-bottom: 0;
+        font-style: normal;
+        /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+        font-size: 14px;
+    }
+
+    .location-sml {
+        margin-bottom: 0;
+        color: #424242;
+        font-style: normal;
+        font-weight: 400;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px;
+    }
+
+    #GISPopupLocation {
+        font-weight: normal;
+        font-style: normal;
+        font-stretch: normal;
+        color: #424242;
+        font-size: 13px;
+    }
+
+      #btnMobileSearch.active,
+      #btnMobileSearch.active:focus,
+      #btnMobileSearch.active:hover,
+      #btnMobileSearchResult.active,
+      #btnMobileSearchResult.active:focus,
+      #btnMobileSearchResult.active:hover,
+      #btnMobileFilterResult.active,
+      #btnMobileFilterResult.active:focus,
+      #btnMobileFilterResult.active:hover {
+        background-color: #fff !important;
+        border: 1px solid #2ea9d3;
+        color: #2ea9d3;
+        position: relative;
+        margin-bottom: 0;
+    }
+
+          #btnMobileSearchResult.active .fa,
+          #btnMobileFilterResult.active .fa {
+            position: absolute;
+            right: 5px;
+            font-size: 20px;
+            bottom: 10px;
+            font-weight: 100;
+            font-style: normal;
+        }
+
+    #btnMobileSearch.active .fa {
+        bottom: 15px;
+        position: absolute;
+        right: 5px;
+        font-size: 20px;
+        font-weight: 100;
+        font-style: normal;
+    }
+
+
+      #btnMobileFilterResult .fa {
+        position: absolute;
+        right: 25px;
+        font-size: 20px;
+        /*bottom: 20px;*/
+        font-weight: 100;
+        font-style: normal;
+    }
+
+    i.fa.fa-sliders {
+        top: 22px;
+    }
+
+      a.viewLinks:hover {
+        text-decoration: none;
+    }
+
+    .search-item h4 {
+        margin-bottom: 5px !important;
+    }
+
+        .search-item h4 img {
+            /*margin:0 5px 0 0 !important;*/
+            margin: 3px 15px 0 0 !important; /*Updated - 13-08-2019*/
+            width: auto !important;
+            height: 40px !important;
+            background: #fff !important;
+        }
+
+        .search-item h4 a {
+            position: relative;
+            top: -10px;
+        }
+
+    #externalMapDivModal {
+        position: relative;
+        z-index: 100;
+    }
+
+    /*.map .esriMapContainer {
+    border-radius: 4px; 
+}*/
+
+    .btn-map-cnt a:hover {
+        text-decoration: none;
+        outline: none;
+    }
+
+    .btn-map-cnt img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .btn-opacity {
+        background-color: #3C7B99 !important;
+    }
+
+    /*Full calendar modal*/
+    /* .fc button {
+        margin-right: 5px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    } */
+
+    /*Modal always on top*/
+    .modal {
+        z-index: 99999;
+    }
+
+
+    #startDate:focus,
+    #endDate:focus,
+    #checkInDate:focus,
+    #checkOutDate:focus {
+        outline-color: #2ea9d3 !important;
+    }
+
+    #startDate:hover,
+    #endDate:hover {
+        cursor: pointer;
+    }
+
+
+    .pagination-border-cnt {
+        border-top: 1px solid #cdd2d4;
+    }
+
+    .btn + .btn {
+        margin-left: 10px;
+    }
+
+    .bootstrap-datetimepicker-widget.dropdown-menu::before,
+    .bootstrap-datetimepicker-widget.dropdown-menu::after {
+        content: none;
+    }
+
+    ul.ui-autocomplete {
+        border: 1px solid #2ea9d3 !important;
+        background-color: #fff;
+        padding: 10px;
+        list-style: none;
+        margin: -1px 0 0;
+    }
+
+    .ui-widget-content .ui-state-active {
+        background: none;
+        border: none;
+        color: #2ea9d3;
+        margin: 0;
+    }
+
+    ul.ui-autocomplete .ui-menu-item {
+        margin-bottom: 10px;
+    }
+
+    .form-group select:-ms-expand {
+        margin-left: -5px;
+    }
+
+    .select2-container--bootstrap .select2-selection {
+        border-radius: 2px !important;
+    }
+
+    .select2-container--bootstrap .select2-dropdown {
+        box-shadow: none;
+        margin-top: 0;
+        border: 2px solid #2ea9d3 !important;
+        border-radius: 0;
+        position: relative;
+    }
+
+
+    .select2-container--bootstrap .select2-results__option--highlighted[aria-selected],
+    .select2-container--bootstrap .select2-results__option[aria-selected="true"] {
+        background-color: transparent;
+        color: #2ea9d3;
+    }
+
+    .select2-container--bootstrap.select2-container--open .select2-dropdown {
+        background-color: #eff3f6;
+    }
+
+    /*Select2 drop down position fix - mobile*/
+    #venueContainer div.col-9 > div > span.select2-container.select2-container--bootstrap.select2-container--open.custom-search > span {
+        margin-bottom: -60px;
+    }
+
+    #resortContainer div.col-12 > div > span.select2-container.select2-container--bootstrap.select2-container--open.custom-search > span {
+        margin-bottom: -60px;
+    }
+
+    .search-filter-item .venue-name {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .search-filter-item .venue-address {
+        font-size: 12px;
+    }
+
+    #externalMapDiv_graphics_layer image {
+        cursor: pointer;
+    }
+
+    #closeMap {
+        display: inline-block;
+    }
+
+    .easy-autocomplete {
+        width: 100% !important;
+    }
+
+    .easy-autocomplete-container ul li.selected {
+        background-color: transparent;
+        border: none;
+        color: #2ea9d3;
+    }
+
+    .search-result-title-cnt > h1 {
+        font-weight: 600;
+        font-size: 32px;
+    }
+
+    /*FilterBtn*/
+    .filterBtn-color {
+        background-color: #424242 !important;
+    }
+
+    .fa-angle-down {
+        margin: 0 8px 0 6px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+    }
+
+    .fa-angle-up {
+        margin: 0 8px 0 6px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+    }
+
+    @media only screen and (max-width: 380px) {
+        #btnMobileFilterResult {
+            margin-left: 0 !important;
+        }
+    }
+
+
+
+    @media only screen and (max-width: 700px) {
+        .search-result-title-cnt {
+            padding-top: 20px;
+            border-bottom: none;
+            /* padding-bottom: 10px;
+        margin: 0 !important;*/
+        }
+
+        .search-result-count {
+            padding: 20px 0 0 0 !important;
+        }
+
+            .search-result-count .col-1-2 {
+                width: 50% !important;
+            }
+
+
+        .search-results-input-cnt #searchContainer {
+            padding: 15px !important;
+        }
+
+        /*.search-results-input-cnt .find-header-row {
+        display: none;
+    }*/
+
+        .popular-halls-rooms-cnt {
+            padding: 0 !important;
+        }
+
+       .search-item {
+            margin-bottom: 0;
+        }
+
+           .search-item .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+      #closeMap .btn {
+            width: auto;
+        }
+
+        .mobile-only {
+            display: block;
+        }
+
+        /*#filterContainer {
+            padding: 30px; /
+            margin: 0;
+        }Updated - 19-08-2019*/
+
+        #filterContainer > .row .col-6 {
+            margin-bottom: 20px;
+        }
+
+            #filterContainer > .row .col-6:last-child {
+                margin-bottom: 0;
+            }
+
+      .clear-filter {
+            padding-bottom: 0;
+            padding-top: 20px;
+            text-align: center;
+        }
+
+            /*  .clear-filter .btn{
+		padding:10px 15px;
+		width: 48.2%;
+	}*/
+
+            /*Updated - 13-08-2019*/
+           .clear-filter .btn {
+                width: 100%;
+            }
+
+
+               .clear-filter .btn:first-child {
+                    margin: 0;
+                }
+
+         .accordion.dl {
+            display: block !important;
+        }
+
+        #btnMobileSearchResult,
+        #btnMobileFilterResult {
+            display: inline-block !important;
+            width: 48%;
+        }
+
+        #btnMobileFilterResult {
+            margin-left: 10px !important;
+            float: right;
+        }
+
+          #filterBtn {
+            display: none;
+        }
+
+        .mobile-search-btn-cnt {
+            display: block !important;
+        }
+
+        #btnMobileSearch {
+            width: 100% !important;
+        }
+
+        #searchContainer,
+        #searchTabContainer,
+        #searchResultContainer {
+            display: none;
+        }
+
+        /* #venueContainer .row,
+            #searchResultContainer .row,
+            .popular-halls-rooms-cnt .row {
+                margin: 0;
+            }*/
+
+        .m-t-20 .row {
+            margin: 0;
+        }
+
+        .popular-halls-rooms-cnt h3 {
+            margin: 0;
+        }
+
+        #btnAllRooms {
+            width: 100% !important;
+        }
+
+        .col-11, .col-10, .col-9,
+        .col-8, .col-7, .col-6,
+        .col-5, .col-4, .col-3,
+        .col-2, .col-1 {
+            width: 100%;
+        }
+
+        /*  h1{
+		margin-top:10px;
+	}*/
+        /*Updated - 19-08-2019*/
+
+        .search-result-title-cnt > h1 {
+            margin-top: 20px;
+        }
+
+          .breadcrumb {
+            display: none;
+        }
+
+        /*  .btn{
+		width:48%;
+	}*/
+
+         #btnVenueSearch.btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        .tab-cnt .btn {
+            border-radius: 2px !important;
+            height: 40px;
+            padding: 13px 0;
+            padding-right: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+            margin: 10px 0 !important;
+        }
+
+        /*  .tab-cnt .btn.icon-right {
+            margin-left: 2%;
+        }*/
+
+        /*   .btn.icon-right {
+        margin-left: 2%;
+    }*/
+
+        .bootstrap-datetimepicker-widget {
+            width: 100% !important;
+        }
+
+        /*#searchContainer{
+        padding-left:0 !important;
+        padding-right:0 !important;
+    }*/
+
+        /*Updated - 13-08-2019*/
+        /* #searchContainer{
+        padding-left:20px !important;
+        padding-right:20px !important;
+    }*/
+
+
+        .footer-btns .btn {
+            width: 100% !important;
+        }
+
+          footer nav a i.arrow-white-down-sm {
+            float: none !important;
+        }
+
+        #btnMobileSearchResult,
+        #btnMobileFilterResult {
+            margin-bottom: 0 !important;
+            /*height: 40px;*/
+            padding: 13px 0;
+        }
+
+        .search-item .col-2 {
+            margin-bottom: 10px;
+        }
+
+        #calendar .btn {
+        }
+    }
+
+.select2-container--bootstrap .select2-selection--single .select2-selection__arrow{
+    bottom: 10px;
+}
+
+
+#acc div.dd fieldset {
+    height: 100%;
+    overflow-x: hidden;
+}

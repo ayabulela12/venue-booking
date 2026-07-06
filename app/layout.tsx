@@ -41,9 +41,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Browser extensions (e.g. Scribe) may inject attributes on <html>/<body> before React hydrates.
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <StoreProvider>
           <RoleProvider>
             {children}

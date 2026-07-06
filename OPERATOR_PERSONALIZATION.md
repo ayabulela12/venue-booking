@@ -16,7 +16,7 @@
 - ✅ **Personalized filters** - "All My Venues" vs "All Venues"
 - ✅ **Operator-specific description** - "View your scheduled events and manage bookings"
 
-#### **3. Dashboard - Operator Focus**
+#### **3. Dashboard - Operator Focus** 
 - ✅ **Role-specific stats** - "My Bookings", "Available Today", etc.
 - ✅ **Quick action cards** - Direct links to venues and calendar
 - ✅ **Operator-focused metrics** - Relevant to venue booking workflow
@@ -28,7 +28,7 @@
 // Operator-specific booking filtering
 const operatorBookings = isOperator 
   ? venueBookings.filter(b => b.organizer === "Test Operator")
-  : venueBookings
+  : venueBookings 
 
 // Personalized UI messaging
 <CardTitle>{isOperator ? "My Bookings" : "Upcoming Bookings"}</CardTitle>

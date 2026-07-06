@@ -3,13 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 import type { Session } from "@supabase/supabase-js"
 import type { UserRole } from "@/lib/types"
-import { createClient } from "@supabase/supabase-js"
-
-// Use shared client instance to maintain auth session
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { getSupabaseClient } from "@/lib/supabase-client"
 
 interface RoleContextValue {
   role: UserRole
@@ -20,7 +14,9 @@ interface RoleContextValue {
   isLocalAdmin: boolean
   isOperations: boolean
   isAdmin: boolean // Backward compatibility
-  isOperator: boolean // Backward compatibility
+  isOperator: boolean // Legacy demo operator role only (not local_admin)
+  municipality: string | undefined
+  userId: string | undefined
   isAuthenticated: boolean
   authLoading: boolean
 }
@@ -29,26 +25,42 @@ const RoleContext = createContext<RoleContextValue | null>(null)
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<UserRole>("local_admin")
+  const [municipality, setMunicipality] = useState<string | undefined>()
+  const [userId, setUserId] = useState<string | undefined>()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [authLoading, setAuthLoading] = useState(true)
 
   const roleFromSession = useCallback((session: Session | null): UserRole => {
     if (!session?.user) return "local_admin"
-    
+
     const metadata = session?.user?.user_metadata as Record<string, unknown> | undefined
-    
+
     // New hierarchical roles (priority)
     if (metadata?.role === "system_admin") return "system_admin"
     if (metadata?.role === "district_manager") return "district_manager"
     if (metadata?.role === "local_admin") return "local_admin"
     if (metadata?.role === "operations") return "operations"
-    
+
     // Backward compatibility mapping
-    if (metadata?.role === "admin") return "system_admin"      // Existing admin → System Admin
-    if (metadata?.role === "operator") return "local_admin"    // Existing operator → Local Admin
-    
+    if (metadata?.role === "admin") return "system_admin"
+    if (metadata?.role === "operator") return "local_admin"
+
     return "local_admin"
   }, [])
+
+  const applySession = useCallback(
+    (session: Session | null) => {
+      setIsAuthenticated(!!session)
+      setRole(roleFromSession(session))
+      const metadata = session?.user?.user_metadata as
+        | Record<string, unknown>
+        | undefined
+      const m = metadata?.municipality
+      setMunicipality(typeof m === "string" && m.length > 0 ? m : undefined)
+      setUserId(session?.user?.id)
+    },
+    [roleFromSession]
+  )
 
   useEffect(() => {
     let unsub: (() => void) | undefined
@@ -56,15 +68,13 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     async function init() {
       setAuthLoading(true)
       try {
-        const { data } = await supabase.auth.getSession()
-        setIsAuthenticated(!!data.session)
-        setRole(roleFromSession(data.session ?? null))
+        const { data } = await getSupabaseClient().auth.getSession()
+        applySession(data.session ?? null)
 
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session: Session | null) => {
-          setIsAuthenticated(!!session)
-          setRole(roleFromSession(session))
+        } = getSupabaseClient().auth.onAuthStateChange((_event, session: Session | null) => {
+          applySession(session)
         })
 
         unsub = () => subscription.unsubscribe()
@@ -74,6 +84,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         console.error(err)
         setIsAuthenticated(false)
         setRole("local_admin")
+        setMunicipality(undefined)
+        setUserId(undefined)
       } finally {
         setAuthLoading(false)
       }
@@ -84,7 +96,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     return () => {
       unsub?.()
     }
-  }, [roleFromSession])
+  }, [applySession])
 
   const toggleRole = useCallback(() => {
     if (isAuthenticated) return
@@ -102,7 +114,9 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         isLocalAdmin: role === "local_admin",
         isOperations: role === "operations",
         isAdmin: role === "system_admin", // Backward compatibility
-        isOperator: role === "local_admin", // Backward compatibility
+        isOperator: role === "operator",
+        municipality,
+        userId,
         isAuthenticated,
         authLoading,
       }}

@@ -1,9 +1,11 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useRole } from "@/components/role-provider"
+import { createClient } from "@supabase/supabase-js"
 import { 
   Building, 
   Calendar,
@@ -12,12 +14,87 @@ import {
   Activity,
   Plus,
   Eye,
-  MapPin
+  MapPin,
+  CalendarPlus
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function LocalAdminDashboard() {
   const { isLocalAdmin } = useRole()
+  const [stats, setStats] = useState({
+    venues: 0,
+    bookings: 0,
+    pending: 0,
+    performance: 0
+  })
+  const [userMunicipality, setUserMunicipality] = useState("polokwane")
+  const [recentBookings, setRecentBookings] = useState<any[]>([])
+  const [userVenues, setUserVenues] = useState<any[]>([])
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      // Get current user's municipality (for demo, default to polokwane)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const municipality = user.user_metadata?.municipality || "polokwane"
+      setUserMunicipality(municipality)
+
+      // Get venue count for this municipality
+      const { data: venues } = await supabase
+        .from('venues')
+        .select('id')
+        .eq('municipality', municipality)
+
+      // Booking counts for this local admin only
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('created_by', user.id)
+
+      const pendingCount = bookings?.filter(b => b.status === 'pending').length || 0
+      const totalBookings = bookings?.length || 0
+
+      setStats({
+        venues: venues?.length || 0,
+        bookings: totalBookings,
+        pending: pendingCount,
+        performance: totalBookings > 0 ? Math.round(((totalBookings - pendingCount) / totalBookings) * 100) : 100
+      })
+
+      // Get recent bookings
+      const { data: recent } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3)
+
+      setRecentBookings(recent || [])
+
+      // Get venues for this municipality
+      const { data: municipalityVenues } = await supabase
+        .from('venues')
+        .select('name')
+        .eq('municipality', municipality)
+        .limit(4)
+
+      setUserVenues(municipalityVenues || [])
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+      toast.error('Failed to load dashboard data')
+    }
+  }
 
   if (!isLocalAdmin) {
     return <div>Access denied</div>
@@ -28,7 +105,7 @@ export default function LocalAdminDashboard() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Local Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Kraaifontein Central - Manage town venues and bookings
+          {userMunicipality.charAt(0).toUpperCase() + userMunicipality.slice(1)} Municipality - Manage venues and bookings
         </p>
       </div>
 
@@ -40,7 +117,7 @@ export default function LocalAdminDashboard() {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
+            <div className="text-2xl font-bold">{stats.venues}</div>
             <p className="text-xs text-muted-foreground">Under management</p>
           </CardContent>
         </Card>
@@ -51,7 +128,7 @@ export default function LocalAdminDashboard() {
             <Ticket className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">6</div>
+            <div className="text-2xl font-bold">{stats.bookings}</div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
@@ -62,7 +139,7 @@ export default function LocalAdminDashboard() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{stats.pending}</div>
             <p className="text-xs text-muted-foreground">Awaiting approval</p>
           </CardContent>
         </Card>
@@ -73,7 +150,7 @@ export default function LocalAdminDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">97%</div>
+            <div className="text-2xl font-bold">{stats.performance}%</div>
             <p className="text-xs text-muted-foreground">Efficiency score</p>
           </CardContent>
         </Card>
@@ -88,7 +165,7 @@ export default function LocalAdminDashboard() {
               Venue Management
             </CardTitle>
             <CardDescription>
-              Manage venues and bookings in your town
+              Manage venues and bookings in your municipality
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -100,9 +177,9 @@ export default function LocalAdminDashboard() {
                 </Button>
               </Link>
               <Link href="/bookings">
-                <Button variant="outline" className="w-full justify-start">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Booking Request
+                <Button className="w-full justify-start">
+                  <CalendarPlus className="h-4 w-4 mr-2" />
+                  Book Venue
                 </Button>
               </Link>
             </div>
@@ -110,22 +187,12 @@ export default function LocalAdminDashboard() {
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Your Venues:</h4>
               <div className="space-y-1 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">✓</Badge>
-                  Kraaifontein Community Hall
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">✓</Badge>
-                  Kraaifontein Sports Center
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">✓</Badge>
-                  Local Library Hall
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">✓</Badge>
-                  Town Meeting Room
-                </div>
+                {userVenues.map((venue, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Badge variant="secondary">✓</Badge>
+                    {venue.name}
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>
@@ -160,9 +227,9 @@ export default function LocalAdminDashboard() {
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Recent Activity:</h4>
               <div className="space-y-1 text-sm text-muted-foreground">
-                <div>• 3 bookings approved this week</div>
-                <div>• 2 pending approval</div>
-                <div>• 1 event scheduled for Saturday</div>
+                <div>• {stats.bookings} total bookings</div>
+                <div>• {stats.pending} pending approval</div>
+                <div>• {stats.bookings - stats.pending} confirmed bookings</div>
               </div>
             </div>
           </CardContent>
@@ -182,44 +249,22 @@ export default function LocalAdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Community Meeting</h4>
-                <Badge variant="default">Confirmed</Badge>
+            {recentBookings.map((booking, index) => (
+              <div key={index} className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium">{booking.title}</h4>
+                  <Badge variant={booking.status === 'confirmed' ? 'default' : booking.status === 'pending' ? 'secondary' : 'outline'}>
+                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {booking.date} • {booking.expected_attendance} attendees
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Organized by {booking.organizer}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Kraaifontein Community Hall • May 15, 2024 • 50 attendees
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Organized by Local Civic Association • Approved by District Manager
-              </p>
-            </div>
-            
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Youth Sports Tournament</h4>
-                <Badge variant="secondary">Pending</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Kraaifontein Sports Center • May 20, 2024 • 120 attendees
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Organized by Youth Sports Club • Awaiting district approval
-              </p>
-            </div>
-            
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Health Awareness Workshop</h4>
-                <Badge variant="outline">Draft</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Local Library Hall • May 25, 2024 • 30 attendees
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Organized by Health Department • Draft booking
-              </p>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -229,10 +274,10 @@ export default function LocalAdminDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Town Information
+            Municipality Information
           </CardTitle>
           <CardDescription>
-            Your role and scope within the district
+            Your role and scope within Capricorn District
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -242,10 +287,10 @@ export default function LocalAdminDashboard() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Badge variant="default">Local Admin</Badge>
-                  Town-level venue management
+                  Municipality-level venue management
                 </div>
                 <p className="text-muted-foreground">
-                  You manage venues and bookings within Kraaifontein Central town. 
+                  You manage venues and bookings within {userMunicipality.charAt(0).toUpperCase() + userMunicipality.slice(1)} municipality. 
                   All booking requests require district manager approval for large events.
                 </p>
               </div>
@@ -255,11 +300,11 @@ export default function LocalAdminDashboard() {
               <h4 className="font-medium mb-2">District Context</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">Kraaifontein District</Badge>
-                  3 towns total
+                  <Badge variant="secondary">Capricorn District</Badge>
+                  4 municipalities total
                 </div>
                 <p className="text-muted-foreground">
-                  Part of Kraaifontein district managed by District Manager. 
+                  Part of Capricorn District managed by District Manager. 
                   Coordinate with other local admins for district-wide events.
                 </p>
               </div>

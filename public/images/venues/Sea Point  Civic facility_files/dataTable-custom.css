@@ -1,0 +1,221 @@
+/*Data Table CSS*/
+
+/*Not sure why .even/odd classes are being targeting in global css - but overriding it here for dataTable styling - targeting ID - easier option to remove from global*/
+table.dataTable .even {
+    background-color: white !important;
+    border: none !important;
+}
+
+table.dataTable .even td {
+    background-color: white !important;
+    border: none !important;
+}
+
+table.dataTable .odd {
+    background-color: white !important;
+    border: none !important;
+}
+
+table.dataTable .odd td {
+    background-color: white !important;
+    border: none !important;
+}
+
+
+
+div.dataTables_wrapper div.dataTables_info {
+    padding-top: 0;
+}
+
+li.paginate_button a img{
+    vertical-align:top;
+}
+
+li.paginate_button a {
+    border:none;
+}
+
+/*Fix expand toggle in mobile*/
+table.dataTable.dtr-inline.collapsed > tbody > tr > td:first-child:before, table.dataTable.dtr-inline.collapsed > tbody > tr > th:first-child:before {
+    top:17px;
+}
+
+/*Alphabet filter*/
+.alphabet-info-display{
+    display:none;
+}
+
+div.alphabet{
+    margin-top: 10px;
+}
+
+tr.alphabet-group, tr.alphabet-group:hover{
+    display: none;
+}
+
+.alphabet li.selected a.active {
+    background-color: #000000 !important;
+    border-color: #000000 !important;
+    border: 1px solid;
+    border-radius: 4px;
+    color: #fff !important;
+}
+
+div.alphabet div.alphabet-info {
+    display: none !important;
+}
+
+/*For hyperlinks*/
+/* .dataTable td a {
+    color: #007bff;
+    text-decoration: underline;
+} */
+
+
+/*Icon*/
+.iconSettings, tr.shown td.details-control:before, td.details-control:before {
+    display: inline-block;
+    font-style: normal;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    height: 14px;
+    width: 14px;
+    position: relative;
+    color: white;
+    border: 2px solid white;
+    border-radius: 14px;
+    box-shadow: 0 0 3px #444;
+    box-sizing: content-box;
+    text-align: center;
+    line-height: 14px;
+    margin: 0 auto;
+}
+
+td.details-control {
+    cursor: pointer;
+    text-align: center;
+}
+
+    td.details-control:before {
+        font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
+        background-color: #cc0066 !important;
+        content: url("data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 512 512' style='enable-background:new 0 0 512 512;' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:none;stroke:%23FFFFFF;stroke-width:48;stroke-linecap:round;stroke-linejoin:round;%7D%0A%3C/style%3E%3Cpolyline class='st0' points='400,184 256,328 112,184 '/%3E%3C/svg%3E%0A") !important;
+    }
+
+tr.shown td.details-control:before {
+    content: url("data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 512 512' style='enable-background:new 0 0 512 512;' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:none;stroke:%23FFFFFF;stroke-width:48;stroke-linecap:round;stroke-linejoin:round;%7D%0A%3C/style%3E%3Cpath class='st0' d='M112,328l144-144l144,144'/%3E%3C/svg%3E") !important;
+    background-color: #d33333;
+}
+
+/*Modal styling for Data Table*/
+
+.dtr-bs-modal .modal-content {
+    width: 100%;
+    background-color: #f5f4f4;
+    top: 10px;
+    margin: 0 auto;
+}
+
+@media (min-width: 1366px) {
+    .dtr-bs-modal .modal-content {
+        width: 50%;
+        background-color: #f5f4f4;
+        top: 10px;
+        margin: 0 auto;
+    }
+}
+
+.dtr-bs-modal .modal-header {
+    display: inline-block;
+}
+
+.dtr-bs-modal .modal-header button span {
+    color:black;
+}
+
+/*For hyperlinks inside data table modal*/
+.dtr-bs-modal td a {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+/*Bold header title*/
+.dtr-bs-modal .modal-content .modal-title {
+    font-weight: 600;
+}
+
+/*Bold column names*/
+.dtr-bs-modal .modal-content table.dtr-details tr td:first-child{
+    font-weight: 600;
+}
+
+/*Print button inside modal*/
+#dt-print .options_icon {
+    height: 16px;
+    -webkit-filter: invert(1);
+    filter: invert(1);
+    margin: 0 8px 0 -8px;
+}
+
+.dt-search {
+    display: inline !important;
+}
+
+@media (min-width: 768px) {
+    .dt-search{
+        display: flex !important;
+    }
+}
+
+/*Adjust data table search box for mobile*/
+.dt-search div.search-block {
+    width: 100% !important;
+}
+
+@media (min-width: 768px) {
+    .dt-search div.search-block {
+        width: 35% !important;
+    }
+}
+
+.dt-search a.btn-small {
+    margin: 15px 0 0 0;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .dt-search a.btn-small {
+        margin-left: 10px;
+        margin-top: 0;
+        width: auto;
+    }
+}
+
+.d-flex {
+    display: block !important;
+}
+
+@media (min-width: 768px) {
+    .d-flex {
+        display: flex !important;
+    }
+}
+
+/*Add item btn icon? need 24x24 - need white*/
+#dt-addItem img{
+    width: 24px;
+    height: 24px;
+}
+
+/* Add inline grid to table child -  to allow stacking of span */ 
+td.child ul li {
+    display: grid;
+}
+
+/* Added padding right to td child to have uniformed spacing */
+td.child {
+    padding-right: 30px;
+}
+
+
+

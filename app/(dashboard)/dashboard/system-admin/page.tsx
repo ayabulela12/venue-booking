@@ -28,7 +28,7 @@ export default function SystemAdminDashboard() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">System Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Super user oversight - Manage all districts, users, and system operations
+          Super user oversight - Manage Capricorn District municipalities, users, and system operations
         </p>
       </div>
 
@@ -36,12 +36,12 @@ export default function SystemAdminDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Districts</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Municipalities</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">Active districts</p>
+            <div className="text-2xl font-bold">4</div>
+            <p className="text-xs text-muted-foreground">Capricorn District</p>
           </CardContent>
         </Card>
         
@@ -51,8 +51,8 @@ export default function SystemAdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">Across all roles</p>
+            <div className="text-2xl font-bold">6</div>
+            <p className="text-xs text-muted-foreground">Across all municipalities</p>
           </CardContent>
         </Card>
         
@@ -62,8 +62,8 @@ export default function SystemAdminDashboard() {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
-            <p className="text-xs text-muted-foreground">System-wide</p>
+            <div className="text-2xl font-bold">31</div>
+            <p className="text-xs text-muted-foreground">Across municipalities</p>
           </CardContent>
         </Card>
         
@@ -73,7 +73,7 @@ export default function SystemAdminDashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">98%</div>
+            <div className="text-2xl font-bold">92%</div>
             <p className="text-xs text-muted-foreground">Operational</p>
           </CardContent>
         </Card>
@@ -88,7 +88,7 @@ export default function SystemAdminDashboard() {
               User Management
             </CardTitle>
             <CardDescription>
-              Create and manage users across all districts and roles
+              Create and manage users across all municipalities and roles
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -168,55 +168,72 @@ export default function SystemAdminDashboard() {
         </Card>
       </div>
 
-      {/* District Overview */}
+      {/* Municipality Overview */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            District Overview
+            Municipality Overview
           </CardTitle>
           <CardDescription>
-            Monitor all districts and their performance
+            Monitor all Capricorn District municipalities and their performance
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Kraaifontein</h4>
-                <Badge variant="secondary">Active</Badge>
+                <h4 className="font-medium">Polokwane</h4>
+                <Badge variant="default">Active</Badge>
               </div>
-              <p className="text-sm text-muted-foreground mb-2">District Manager: John Smith</p>
+              <p className="text-sm text-muted-foreground mb-2">Main City - Administrative Center</p>
               <div className="text-xs space-y-1">
-                <div>• 8 venues managed</div>
-                <div>• 12 active bookings</div>
-                <div>• 95% performance score</div>
+                <div>• 12 venues managed</div>
+                <div>• 9 active bookings</div>
+                <div>• 78% confirmed rate</div>
+                <div>• Low risk indicator</div>
               </div>
             </div>
             
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Bellville</h4>
-                <Badge variant="secondary">Active</Badge>
+                <h4 className="font-medium">Blouberg</h4>
+                <Badge variant="default">Active</Badge>
               </div>
-              <p className="text-sm text-muted-foreground mb-2">District Manager: Sarah Johnson</p>
+              <p className="text-sm text-muted-foreground mb-2">Rural Municipality</p>
               <div className="text-xs space-y-1">
                 <div>• 6 venues managed</div>
-                <div>• 8 active bookings</div>
-                <div>• 92% performance score</div>
+                <div>• 2 active bookings</div>
+                <div>• 50% confirmed rate</div>
+                <div>• Low risk indicator</div>
               </div>
             </div>
             
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Parow</h4>
-                <Badge variant="outline">Setup</Badge>
+                <h4 className="font-medium">Molemole</h4>
+                <Badge variant="default">Active</Badge>
               </div>
-              <p className="text-sm text-muted-foreground mb-2">District Manager: Not assigned</p>
+              <p className="text-sm text-muted-foreground mb-2">Mixed Urban-Rural</p>
               <div className="text-xs space-y-1">
-                <div>• 4 venues managed</div>
-                <div>• 3 active bookings</div>
-                <div>• 88% performance score</div>
+                <div>• 8 venues managed</div>
+                <div>• 2 active bookings</div>
+                <div>• 50% confirmed rate</div>
+                <div>• Medium risk indicator</div>
+              </div>
+            </div>
+            
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium">Lepelle-Nkumpi</h4>
+                <Badge variant="outline">Active</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">Rural Mining Communities</p>
+              <div className="text-xs space-y-1">
+                <div>• 5 venues managed</div>
+                <div>• 2 active bookings</div>
+                <div>• 50% confirmed rate</div>
+                <div>• Low risk indicator</div>
               </div>
             </div>
           </div>

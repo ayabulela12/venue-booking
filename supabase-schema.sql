@@ -12,6 +12,10 @@ CREATE TABLE IF NOT EXISTS venues (
   owner_name TEXT NOT NULL,
   owner_contact TEXT NOT NULL,
   address TEXT NOT NULL,
+  municipality TEXT,
+  about_venue TEXT,
+  features TEXT[] DEFAULT '{}',
+  activities TEXT[] DEFAULT '{}',
   image TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -91,11 +95,78 @@ ALTER TABLE override_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE parking_areas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE roads ENABLE ROW LEVEL SECURITY;
 
--- Venues: Everyone can read, only admins can write
+-- JWT helpers for RLS: app role and municipality live in user_metadata (not jwt->>'role',
+-- which is the Postgres role "authenticated" in Supabase).
+CREATE OR REPLACE FUNCTION public.jwt_app_role()
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = public
+AS $$
+  SELECT COALESCE(
+    NULLIF(auth.jwt() -> 'user_metadata' ->> 'role', ''),
+    NULLIF(auth.jwt() -> 'app_metadata' ->> 'role', '')
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.jwt_user_municipality()
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = public
+AS $$
+  SELECT COALESCE(
+    NULLIF(auth.jwt() -> 'user_metadata' ->> 'municipality', ''),
+    NULLIF(auth.jwt() -> 'app_metadata' ->> 'municipality', '')
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.jwt_app_role() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.jwt_user_municipality() TO authenticated;
+
+-- Venues: public read; writes for system_admin (and legacy admin metadata) or scoped district_manager
 CREATE POLICY "Venues are viewable by everyone" ON venues FOR SELECT USING (true);
-CREATE POLICY "Admins can manage venues" ON venues FOR ALL USING (
-  auth.jwt() ->> 'role' = 'admin'
-);
+
+CREATE POLICY "venues_insert_system_admin" ON venues FOR INSERT TO authenticated
+  WITH CHECK (public.jwt_app_role() IN ('system_admin', 'admin'));
+
+CREATE POLICY "venues_update_system_admin" ON venues FOR UPDATE TO authenticated
+  USING (public.jwt_app_role() IN ('system_admin', 'admin'))
+  WITH CHECK (public.jwt_app_role() IN ('system_admin', 'admin'));
+
+CREATE POLICY "venues_delete_system_admin" ON venues FOR DELETE TO authenticated
+  USING (public.jwt_app_role() IN ('system_admin', 'admin'));
+
+CREATE POLICY "venues_insert_district_manager" ON venues FOR INSERT TO authenticated
+  WITH CHECK (
+    public.jwt_app_role() = 'district_manager'
+    AND public.jwt_user_municipality() IS NOT NULL
+    AND municipality IS NOT DISTINCT FROM public.jwt_user_municipality()
+  );
+
+CREATE POLICY "venues_update_district_manager" ON venues FOR UPDATE TO authenticated
+  USING (
+    public.jwt_app_role() = 'district_manager'
+    AND public.jwt_user_municipality() IS NOT NULL
+    AND municipality IS NOT DISTINCT FROM public.jwt_user_municipality()
+  )
+  WITH CHECK (
+    public.jwt_app_role() = 'district_manager'
+    AND public.jwt_user_municipality() IS NOT NULL
+    AND municipality IS NOT DISTINCT FROM public.jwt_user_municipality()
+  );
+
+CREATE POLICY "venues_delete_district_manager" ON venues FOR DELETE TO authenticated
+  USING (
+    public.jwt_app_role() = 'district_manager'
+    AND public.jwt_user_municipality() IS NOT NULL
+    AND municipality IS NOT DISTINCT FROM public.jwt_user_municipality()
+  );
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.venues TO authenticated;
+GRANT SELECT ON TABLE public.venues TO anon;
 
 -- Bookings: Everyone can read, authenticated users can create, admins can update
 CREATE POLICY "Bookings are viewable by everyone" ON bookings FOR SELECT USING (true);
@@ -140,13 +211,17 @@ CREATE INDEX IF NOT EXISTS idx_bookings_created_by ON bookings(created_by);
 CREATE INDEX IF NOT EXISTS idx_trigger_logs_booking_id ON trigger_logs(booking_id);
 CREATE INDEX IF NOT EXISTS idx_override_logs_booking_id ON override_logs(booking_id);
 
--- Function to get user role from metadata
+-- Function to get user role from JWT user_metadata (matches app session metadata)
 CREATE OR REPLACE FUNCTION get_user_role()
 RETURNS TEXT AS $$
 BEGIN
-  RETURN COALESCE(auth.jwt() ->> 'role', 'operator');
+  RETURN COALESCE(
+    NULLIF(auth.jwt() -> 'user_metadata' ->> 'role', ''),
+    NULLIF(auth.jwt() -> 'app_metadata' ->> 'role', ''),
+    'local_admin'
+  );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql STABLE SECURITY INVOKER SET search_path = public;
 
 -- Update user role in JWT when they sign in
 CREATE OR REPLACE FUNCTION public.handle_new_user()

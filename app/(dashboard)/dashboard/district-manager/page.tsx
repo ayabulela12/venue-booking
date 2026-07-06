@@ -29,7 +29,7 @@ export default function DistrictManagerDashboard() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">District Manager Dashboard</h1>
         <p className="text-muted-foreground">
-          Kraaifontein District - Manage operations across all towns and venues
+          Capricorn District - Manage operations across all municipalities and venues
         </p>
       </div>
 
@@ -37,12 +37,12 @@ export default function DistrictManagerDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Towns Managed</CardTitle>
+            <CardTitle className="text-sm font-medium">Municipalities Managed</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">In Kraaifontein district</p>
+            <div className="text-2xl font-bold">4</div>
+            <p className="text-xs text-muted-foreground">In Capricorn district</p>
           </CardContent>
         </Card>
         

@@ -1,0 +1,1768 @@
+﻿/*
+
+City of Cape Town, hereby disclaims all copyright interest in this script file that facilitates the creation of a full calendar schedule (which utilises the Fullcalendar.io Scheduler module) written by Sean Dentener.
+12 April 2018
+
+
+This program is free software: you can redistribute it and/ or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.If not, see < http://www.gnu.org/licenses/>.
+*/
+
+
+// function createMap(mapquery, extentvar) {
+
+
+//        require(["esri/config", "esri/SpatialReference", "esri/geometry/Extent", "esri/map", "esri/layers/ArcGISTiledMapServiceLayer", "esri/tasks/query", "esri/tasks/QueryTask", "esri/graphic",
+//            "esri/symbols/PictureMarkerSymbol", "esri/layers/ArcGISDynamicMapServiceLayer","dojo/domReady!"],
+//            function (esriConfig, SpatialReference, Extent, Map, ArcGISTiledMapServiceLayer, Query, QueryTask, Graphic, PictureMarkerSymbol, ArcGISDynamicMapServiceLayer) {
+
+//                //Create map layers
+//                topoMapLayer = new ArcGISTiledMapServiceLayer('https://citymaps.capetown.gov.za/agsext1/rest/services/Background_Maps/Land_Topo_50K/MapServer', {
+//                    id: "topoMapLayer"
+//                });
+
+//                reliefMapLayer = new ArcGISTiledMapServiceLayer('https://citymaps.capetown.gov.za/agsext1/rest/services/Background_Maps/Relief_Map/MapServer', {
+//                    id: "reliefMapLayer"
+//                });
+
+//                //seaLayer = new ArcGISTiledMapServiceLayer('https://citymaps.capetown.gov.za/agsext1/rest/services/Background_Maps/Sea/MapServer', {
+//                //    id: "seaLayer"
+//                //});
+
+//                lowBaseDataLayer = new ArcGISTiledMapServiceLayer('https://citymaps.capetown.gov.za/agsext1/rest/services/Background_Maps/Base_Data_Low_Detail/MapServer', {
+//                    id: "lowBaseDataLayer"
+//                });
+
+//                highBaseDataLayer = new ArcGISTiledMapServiceLayer('https://citymaps.capetown.gov.za/agsext1/rest/services/Background_Maps/Base_Data_High_Detail/MapServer', {
+//                    id: "highBaseDataLayer"
+//                });
+
+//                aerialLayer = new ArcGISTiledMapServiceLayer('https://citymaps.capetown.gov.za/agsext1/rest/services/Aerial_Photography_Cached/AP_2016_Jan/MapServer', {
+//                    id: "AerialLayer",
+//                    visible: true
+//                });
+
+//                //Create a SpatialReference.
+//                var sr = new SpatialReference({
+//                    wkid: 3857
+//                });
+
+//                //Create an Extent.
+//                //var extent = new Extent(2016158.9953595751, -4065871.6821664837, 2126022.6817536145, -3974566.966223718, sr);
+//                var extent = new Extent(extentvar, sr);
+//                //var extent = extentvar;
+
+//                //Create a new map.
+//                externalMap = new Map("externalMapDiv", {
+//                    extent: extent,
+//                    logo: false,
+//                    slider: false,
+//                    showLabels: true
+//                });
+
+//                //Add layers to the map, take note of the order.
+//                //externalMap.addLayers([reliefMapLayer, seaLayer, highBaseDataLayer, lowBaseDataLayer, topoMapLayer])
+//                externalMap.addLayers([reliefMapLayer, highBaseDataLayer, lowBaseDataLayer, topoMapLayer, aerialLayer])
+
+//                var addressQuery = new Query();
+//                //addressQuery.where = "PARK_NAME = 'HIGHFIELD COMMUNITY GARDEN'"
+//                addressQuery.where = "UPPER(OFC_SBRB_NAME) = UPPER('" + mapquery +"')"
+//                addressQuery.outFields = ["*"]
+//                addressQuery.returnGeometry = true;
+
+//                //var addressQueryTask = new QueryTask("https://citymaps.capetown.gov.za/agsext1/rest/services/Theme_Based/EGISViewer/MapServer/27");
+//                var addressQueryTask = new QueryTask("https://citymaps.capetown.gov.za/agsext1/rest/services/Theme_Based/EGISViewer/MapServer/75");
+//                addressQueryTask.on("complete", displayAddress);
+//                addressQueryTask.execute(addressQuery);
+
+
+//                function displayAddress(result) {
+
+//                    var featureSet = result.featureSet;
+//                    var geometry = featureSet.features[0].geometry;
+//                    if (geometry.type != 'point') {
+//                        geometry = geometry.getCentroid();
+//                    }
+
+//                    var pictureMarker = new PictureMarkerSymbol("/_layouts/15/INC/FacilityBooking/map-marker-icon.png", 40, 84)
+//                    pictureMarker = eval(pictureMarker);
+//                    var graphic = new Graphic(geometry, pictureMarker);
+
+//                    externalMap.graphics.clear();
+//                    externalMap.graphics.add(graphic)
+//                    externalMap.centerAndZoom(geometry, 7);
+//                }
+//            });
+
+// }
+
+
+
+var TheFacilityTitle = '';
+
+function setFacilityName(facilityName) {
+
+    TheFacilityTitle = facilityName;
+  
+}
+
+var resources = '';
+
+function setResources(theresources) {
+
+    resources = JSON.parse(theresources);
+    
+}
+
+
+var events = '';
+
+function setEvents(theevents) {
+
+    events = JSON.parse(theevents);
+
+
+}
+
+function showCalendar()
+{
+
+    
+    toggleModal();
+
+    $('#calendar').attr("style", "");
+    $('#divcaldatespan').html(TheFacilityTitle);
+
+
+    if ($('#calendar')) {
+        $('#calendar').fullCalendar('destroy'); // Destroy the calender and all resource/events.. Ready for next generation
+    }
+    // Define the full calender functionality , attributes
+    // Start  -- Defining Full Calender
+    $('#calendar').fullCalendar({
+
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        themeSystem: 'bootstrap4', // Select Theme system - base is standard or empty ,jquery-ui, bootstrap3
+        editable: false, // enable draggable events
+        nowIndicator: true,
+        contentHeight: "auto",
+        contentWidth: "auto",
+        timezone: "Africa/Harare",
+        firstDay: 1,
+        navLinks: true,
+        locale: "en-gb",
+        businessHours: false,
+        eventOverlap: false,
+        slotDuration: '01:00:00',  // Set Time Slot (1 Hour default)
+        //timeFormat: 'H(:mm)', // uppercase H for 24-hour clock
+        allDayDefault: false,
+        aspectRatio: 1.8, // 1.8 Default
+        scrollTime: '08:00', // undo default 6am scrollTime
+        displayEventTime: false,
+
+        // Add your event
+        selectable: false,
+        selectOverlap: false,
+        selectHelper: true,
+        eventBorderColor: "black",
+
+        eventClick: function (eventObj) {
+            if (eventObj.url) {
+                alert(
+                    'Clicked ' + eventObj.title + '.\n' +
+                    'Will open ' + eventObj.url + ' in a new tab'
+                );
+
+                window.open(eventObj.url);
+
+                return false; // prevents browser from following link in current tab.
+            } else {
+
+                $('#calendar').fullCalendar('changeView', 'timelineDay', eventObj.start);
+            }
+        },
+
+        // Monitor event drop and schedule change
+        eventDrop: function (event, delta, revertFunc) {
+
+            eventnewstart = moment(event.start).format("DD MMMM YYYY");
+            eventnewend = moment(event.end).format("DD MMMM YYYY");
+            eventnewstarttime = moment(event.start).format("HH");
+            eventnewendtime = moment(event.end).format("HH");
+
+            if (!confirm("Confirm new date: " + eventnewstart + " " + eventnewstarttime + "h00 - " + eventnewend + " " + eventnewendtime + "h00")) {
+                revertFunc();
+            } else {
+                // write new selection date
+
+                document.getElementById("divcaldatespan").innerHTML = "<h3>DATE SELECTION: " + eventnewstart + " - " + eventnewend + "</h3>";
+                eventnewstarttime = moment(event.start).format("HH:MM");
+                eventnewendtime = moment(event.end).format("HH:MM");
+                eventnewstart = moment(event.start).format("DD/MM/YYYY");
+                eventnewend = moment(event.end).format("DD/MM/YYYY");
+
+            }
+
+        },
+
+        // Monitor event resize and schedule change
+        eventResizeStop: function (event, delta, revertFunc) {
+
+            //alert(event.title + " was resized on " + event.start.format());
+            eventnewstart = moment(event.start).format("DD MMMM YYYY");
+            eventnewend = moment(event.end).format("DD MMMM YYYY");
+            eventnewstarttime = moment(event.start).format("HH");
+            eventnewendtime = moment(event.end).format("HH");
+
+            if (!confirm("Confirm new date: " + eventnewstart + " " + eventnewstarttime + "h00 - " + eventnewend + " " + eventnewendtime + "h00")) {
+                revertFunc();
+            } else {
+                // write new selection date
+                document.getElementById("divcaldatespan").innerHTML = "<h3>DATE SELECTION: " + eventnewstart + " - " + eventnewend + "</h3>";
+                eventnewstarttime = moment(event.start).format("HH:MM");
+                eventnewendtime = moment(event.end).format("HH:MM");
+                eventnewstart = moment(event.start).format("DD/MM/YYYY");
+                eventnewend = moment(event.end).format("DD/MM/YYYY");
+            }
+
+        },
+
+        header: {
+            left: 'today prev,next',
+            center: 'title',
+            right: 'timelineDay,month,listWeek'
+            //right: 'timelineDay,agendaWeek,month,listWeek'
+        },
+        defaultView: 'listWeek',
+        //listDay, listWeek, listMonth, and listYear
+        views: {
+            listWeek: { buttonText: 'list week', noEventsMessage: "No events to display" },
+            month: {
+                eventLimit: 200
+            }, // adjust to 6 only for agendaWeek/agendaDay
+            agendaWeek: {
+                eventLimit: 200
+            }, // adjust to 6 only for agendaWeek/agendaDay
+
+
+        },
+
+        resourceOrder: '-type1',
+        resourceAreaWidth: '40%',
+
+        resourceColumns: [
+
+            {
+                labelText: 'Room',
+                field: 'title'
+            },
+
+        ],
+
+
+        resources: resources,
+
+        events: events
+        
+
+    });
+    // End  -- Defining Full Calender
+
+    var y = 1;
+
+    window.scroll(0, 0);
+}
+
+function closeCalendar()
+{
+    $('#calendar').attr("style", "display:none;");
+
+}
+
+function setBookingEnquiries() { 
+
+        var bookingEnquiriesContent = "<a href='#' onclick='showCalendar(); return false; ' title='CHECK AVAILABILITY' class='btn'>CHECK AVAILABILITY</a> <br/><br/>Note: Once you&nbsp;have received confirmation that the&nbsp;room you have requested is available, you will be required to make a&nbsp;payment&nbsp;to secure&nbsp;your booking.<br><br>";
+        $('#bookingEnquiries').html(bookingEnquiriesContent);
+
+};
+
+function showListingCalendar(resources, events, facilityTitle) {
+
+
+    toggleModal();
+
+
+    var incommingResources = resources;
+
+    var incommingEvents = events;
+
+    $('#calendar').attr("style", "");
+
+    $('#calendarTitle').html(facilityTitle);
+    $('#divcaldatespan').html(facilityTitle);
+
+
+        if ($('#calendar')) {
+            $('#calendar').fullCalendar('destroy'); // Destroy the calender and all resource/events.. Ready for next generation
+        }
+        // Define the full calender functionality , attributes
+        // Start  -- Defining Full Calender
+        $('#calendar').fullCalendar({
+
+            schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+            themeSystem: 'bootstrap4', // Select Theme system - base is standard or empty ,jquery-ui, bootstrap3
+            editable: false, // enable draggable events
+            nowIndicator: true,
+            contentHeight: "auto",
+            contentWidth: "auto",
+            timezone: "Africa/Harare",
+            firstDay: 1,
+            navLinks: true,
+            locale: "en-gb",
+            businessHours: false,
+            eventOverlap: false,
+            slotDuration: '01:00:00',  // Set Time Slot (1 Hour default)
+            //timeFormat: 'H(:mm)', // uppercase H for 24-hour clock
+            allDayDefault: false,
+            aspectRatio: 1.8, // 1.8 Default
+            scrollTime: '08:00', // undo default 6am scrollTime
+            displayEventTime: false,
+
+            // Add your event
+            selectable: false,
+            selectOverlap: false,
+            selectHelper: true,
+            eventBorderColor: "black",
+
+            eventClick: function (eventObj) {
+                if (eventObj.url) {
+                    alert(
+                        'Clicked ' + eventObj.title + '.\n' +
+                        'Will open ' + eventObj.url + ' in a new tab'
+                    );
+
+                    window.open(eventObj.url);
+
+                    return false; // prevents browser from following link in current tab.
+                } else {
+                    //alert('Clicked ' + eventObj.title);
+                    $('#calendar').fullCalendar('changeView', 'timelineDay', eventObj.start);
+                }
+            },
+
+            // Monitor event drop and schedule change
+            eventDrop: function (event, delta, revertFunc) {
+
+                eventnewstart = moment(event.start).format("DD MMMM YYYY");
+                eventnewend = moment(event.end).format("DD MMMM YYYY");
+                eventnewstarttime = moment(event.start).format("HH");
+                eventnewendtime = moment(event.end).format("HH");
+
+                if (!confirm("Confirm new date: " + eventnewstart + " " + eventnewstarttime + "h00 - " + eventnewend + " " + eventnewendtime + "h00")) {
+                    revertFunc();
+                } else {
+                    // write new selection date
+
+                    document.getElementById("divcaldatespan").innerHTML = "<h3>DATE SELECTION: " + eventnewstart + " - " + eventnewend + "</h3>";
+                    eventnewstarttime = moment(event.start).format("HH:MM");
+                    eventnewendtime = moment(event.end).format("HH:MM");
+                    eventnewstart = moment(event.start).format("DD/MM/YYYY");
+                    eventnewend = moment(event.end).format("DD/MM/YYYY");
+
+                }
+
+            },
+
+            // Monitor event resize and schedule change
+            eventResizeStop: function (event, delta, revertFunc) {
+
+                //alert(event.title + " was resized on " + event.start.format());
+                eventnewstart = moment(event.start).format("DD MMMM YYYY");
+                eventnewend = moment(event.end).format("DD MMMM YYYY");
+                eventnewstarttime = moment(event.start).format("HH");
+                eventnewendtime = moment(event.end).format("HH");
+
+                if (!confirm("Confirm new date: " + eventnewstart + " " + eventnewstarttime + "h00 - " + eventnewend + " " + eventnewendtime + "h00")) {
+                    revertFunc();
+                } else {
+                    // write new selection date
+                    document.getElementById("divcaldatespan").innerHTML = "<h3>DATE SELECTION: " + eventnewstart + " - " + eventnewend + "</h3>";
+                    eventnewstarttime = moment(event.start).format("HH:MM");
+                    eventnewendtime = moment(event.end).format("HH:MM");
+                    eventnewstart = moment(event.start).format("DD/MM/YYYY");
+                    eventnewend = moment(event.end).format("DD/MM/YYYY");
+                }
+
+            },
+
+            header: {
+                left: 'today prev,next',
+                center: 'title',
+                right: 'timelineDay,month,listWeek'
+                //right: 'timelineDay,agendaWeek,month,listWeek'
+            },
+            defaultView: 'listWeek',
+            //listDay, listWeek, listMonth, and listYear
+            views: {
+                listWeek: { buttonText: 'list week', noEventsMessage: "No events to display" },
+                month: {
+                    eventLimit: 200
+                }, // adjust to 6 only for agendaWeek/agendaDay
+                agendaWeek: {
+                    eventLimit: 200
+                }, // adjust to 6 only for agendaWeek/agendaDay
+
+
+            },
+
+            resourceOrder: '-type1',
+            resourceAreaWidth: '40%',
+
+            resourceColumns: [
+
+                {
+                    labelText: 'Room',
+                    field: 'title'
+                },
+
+            ],
+
+           
+            resources: incommingResources,
+
+            events: events
+           
+
+        });
+
+        var y = 1;
+        
+
+
+  
+    var ContactDetailsFacility = "ContactDetails" + facilityTitle.replace(/\s/g, '').replace('-','');
+
+    document.getElementById("contactDetailCalendar").innerHTML = document.getElementById(ContactDetailsFacility).innerHTML;
+
+    resources = [];
+    events = [];
+    window.scroll(0, 0);
+
+
+
+}
+
+function checkFacilityBookingAdvancedSearch(repeaterDiv, inputHolderName) {
+
+        var checkboxesHolder = repeaterDiv.find('input:checked');
+        $('#' + inputHolderName).val("");
+        var checkedItems = "";
+        for (var item in checkboxesHolder) {
+            var inputHolder = checkboxesHolder[item].id;
+
+            if ($('#' + inputHolder).is(':checkbox')) {
+                checkedItems += $('#' + inputHolder).val() + ',';
+            }
+        }
+
+        $('#' + inputHolderName).val(checkedItems);
+
+        //if (checkboxHolder[0].checked == true) {
+
+        //    checkboxHolder.attr("Checked", "true");
+
+        //} else {
+
+        //    checkboxHolder.removeAttr("Checked");
+
+        //}
+}
+
+
+    
+function setupSelects() {
+
+    if (fs == undefined) {
+        var fs = [];
+    }
+
+$(document).ready(function () {
+
+    // if (window.location.href.indexOf("bookafacility.aspx") != -1) {
+
+        setTimeout(function () {
+        $('#HallsFacilityName').select2();
+        $('#HallsFacilitySuburb').select2();
+
+        //$('#HallsFacilitySuburb').select2();
+
+        $('#ResortsFacilityName').select2();
+        $('#ResortsFacilitySuburb').select2();
+
+
+        $('.resorts').hide();
+
+
+
+       
+
+        // $('body').on('click', '.cancelFilter', function (e) {
+        //     $('.filter-mobi-fullscreen').removeClass('fullscreen-takeover');
+        //     $('.showFilters').show();
+        //     $('.accordion').hide();
+        // });
+
+
+        // $('body').on('click', '.applyFilter', function (e) {
+        //     $('.filter-mobi-fullscreen').removeClass('fullscreen-takeover');
+        //     $('.showFilters').show();
+        //     $('.accordion').hide();
+        // });
+        
+        }, 2000);
+
+        // Start the week on Monday
+        moment.updateLocale('en', {
+            week: { dow: 1 } // Monday is the first day of the week
+        });
+
+        $(function (today) {
+            $('.HallsFacilityAvailableDate').datetimepicker({
+                useCurrent: false,
+                locale: 'eu',
+                inline: true,
+                //minDate: moment(),
+                //format: "DD MMMM YYYY hh A",
+                format: "DD MMMM YYYY",
+                //sideBySide: true
+                icons: {
+                    time: "fa fa-clock-o",
+                    date: "fa fa-calendar",
+                    up: "fa fa-arrow-up",
+                    down: "fa fa-arrow-down",
+                    next: "fa fa-arrow-right",
+                    previous: "fa fa-arrow-left",
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
+
+            });
+
+            $('.HallsFacilityAvailableTime').datetimepicker({
+                useCurrent: false,
+                locale: 'eu',
+                format: "hh A",
+                inline: true,
+                //sideBySide: true,
+                icons: {
+                    time: "fa fa-clock-o",
+                    date: "fa fa-calendar",
+                    up: "fa fa-arrow-up",
+                    down: "fa fa-arrow-down",
+                    next: "fa fa-arrow-right",
+                    previous: "fa fa-arrow-left",
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
+            });
+
+
+            // Hide from starting render
+            //$('.HallsFacilityAvailableDate').data("DateTimePicker").hide();
+            //$('.HallsFacilityAvailableTime').data("DateTimePicker").hide();
+
+
+
+
+
+
+
+        });
+
+        $(function (today) {
+            $('.ResortsFacilityAvailableDate').datetimepicker({
+                useCurrent: false,
+                locale: 'eu',
+                inline: true,
+                //minDate: moment(),
+                //format: "DD MMMM YYYY hh A",
+                format: "DD MMMM YYYY",
+                //sideBySide: true
+                icons: {
+                    time: "fa fa-clock-o",
+                    date: "fa fa-calendar",
+                    up: "fa fa-arrow-up",
+                    down: "fa fa-arrow-down",
+                    next: "fa fa-arrow-right",
+                    previous: "fa fa-arrow-left",
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
+
+            });
+
+            $('.ResortsFacilityAvailableTime').datetimepicker({
+                useCurrent: false,
+                locale: 'eu',
+                format: "hh A",
+                inline: true,
+                //sideBySide: true,
+                icons: {
+                    time: "fa fa-clock-o",
+                    date: "fa fa-calendar",
+                    up: "fa fa-arrow-up",
+                    down: "fa fa-arrow-down",
+                    next: "fa fa-arrow-right",
+                    previous: "fa fa-arrow-left",
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
+            });
+
+
+            // Hide from starting render
+            //$('.ResortsFacilityAvailableDate').data("DateTimePicker").hide();
+            //$('.ResortsFacilityAvailableTime').data("DateTimePicker").hide();
+
+        });
+
+
+       
+    //}
+});
+
+}
+
+function setFeaturesClick() {
+$('.ms-ref-refinername').on('click', function (e) {
+    if ($(this).hasClass("closed")) {
+        // var allPanels = $('.ms-ref-refiner > div > div > div > fieldset.ms-ref-unselSec').show();
+
+        $(".ms-ref-refinername").each(function () {
+
+            closeFilterTab($(this));
+        });
+
+        openFilterTab($(this));
+    }
+    else if ($(this).hasClass("open")) {
+        
+        closeFilterTab($(this));
+    }
+});
+
+
+
+}
+
+function clearAllFeaturesSelected() {
+
+    $("#FacilityFeatures-MultiRefiner").find(':checkbox').each(function(){
+        $(this).prop('checked', '');
+    });
+
+
+         //Filter button
+         $("#filterBtn").click(function(){
+            if($("#filterContainer").hasClass("hide")){
+                $(this).find('i').removeClass("fa-angle-down");
+                $(this).find('i').addClass("fa-angle-up");
+                $("#filterContainer").removeClass("hide");
+            }else{
+                $(this).find('i').addClass("fa-angle-down");
+                $(this).find('i').removeClass("fa-angle-up");
+                $("#filterContainer").addClass("hide");
+            }
+        });
+
+        $("#advancedClearBtn").hide();
+        setTimeout(() => {
+            location.href = location.href.split("&refiners=")[0];
+        }, 500);
+        
+        
+}
+
+
+
+
+var fs = [];
+
+var theDatatable = null;
+
+var facilityNames = "";
+var facilityNamesArray = [];
+var facilityPhotosArray = [];
+var facilityLocation = [];
+var facilityType = "";
+
+
+var theFacilityData = null;
+var refinerCollection = [];
+
+function setFacilityTable(facilityDataJson) {
+    theFacilityData = JSON.parse(facilityDataJson);
+   counter = 1;
+
+
+
+   theDatatable = $("table.foundFacilities").DataTable({
+        data: theFacilityData,
+        pageLength: 50,
+        deferRender: true,
+        columns: [
+            { 
+            targets: 0,
+            render: function (data, type, row, meta) {
+                    counter = meta.row - (Math.floor(meta.row / 50) * 50) + 1;
+
+                    var facilityTitleNoSpaces = '';
+
+                    // row.Name = row.Name.replace(/’/g, '\'');
+                    row.Name = row.Name.replace(/'/g, '\'');
+                    facilityTitleNoSpaces = row.Name.replaceAll('’','');
+                    facilityTitleNoSpaces = facilityTitleNoSpaces.replaceAll('\'','');
+                    facilityTitleNoSpaces = facilityTitleNoSpaces.replace(/\s/g, '');
+                    facilityTitleNoSpaces = facilityTitleNoSpaces.replace(/-/g, '');
+                    facilityTitleNoSpaces = facilityTitleNoSpaces.replaceAll("-" , "");
+                    facilityTitleNoSpaces = facilityTitleNoSpaces.replaceAll("/" , "");
+                    facilityTitleNoSpaces = facilityTitleNoSpaces.replace(":" , "");
+                    facilityTitleNoSpaces = facilityTitleNoSpaces.replaceAll("'" , "");
+
+                    var result = "<div class='row m-b-20 search-item list-figure-item'><figure><a href='facility?facilitytype=" + row.FacilityType + '&facilityname=' + row.Name + "' title='" + row.Name + "'>";
+                    result += "<img src='" + row.RollupImage + "' alt='' class='responsive'/></a></figure><h4>";
+                    result += "<img src='assets/images/FacilityBookingPins/pin" + counter + ".png' class='icon map-pin' alt='" + row.Name  + "'>";
+                    result += " <a href='facility?facilitytype=" + row.FacilityType + '&facilityname=' + row.Name.replaceAll("'","%27") + "' title='" + row.Name.replaceAll("'","%27") +"' title=''>" + row.Name + "</a>";
+                    result += "<a href='#' onclick='fs[&quot;" + facilityTitleNoSpaces + "&quot;]();   return false; ' title='Check Availability' id='CA-btn-top' class='btn right' style=''>Check Availability</a></h4>";
+                    result += " <div class='col-7'><p class='sml locAlign'>" + row.Location + "</p></div>";
+                    result += "<p id='ContactDetails" + facilityTitleNoSpaces  + "' class='col-7 sml contactAlign' style='display:none;'> " + row.Location +  "<br><a href='tel:" + row.BookingClerkContactPhone + "'>" + row.BookingClerkContactPhone + "</a><br><a href='mailto:RPHall.Bookings@capetown.gov.za'>RPHall.Bookings@capetown.gov.za</a></p> <a href='#' onclick='fs[&quot;" + facilityTitleNoSpaces + "&quot;]();  return false; ' title='Check Availability' id='CA-btn-bottom' class='btn right' style=' '>Check Availability</a></div>";
+                    // result += "<div style='display:none;'>" + row.Features +   "</div>";
+
+                     try {
+                        var el = document.createElement( 'div' );
+                        el.innerHTML = row.CalendarData;
+             
+                        var showCheckAvailability = ""
+             
+                        var calendarData2 = el.getElementsByTagName( 'script' );
+                        if (calendarData2.length > 0)
+                        {
+                            fs[facilityTitleNoSpaces] = new Function('show' + facilityTitleNoSpaces + 'Calendar', calendarData2[0].innerText.replace('//]]>',';').replace('\n','').replaceAll("SingleQuote","\'") + ' showListingCalendar(resources,events,"' + row.Name + '"); ');
+                        }
+                    } catch(error)
+                    {
+                    showCheckAvailability = "display:none;"
+                    console.log("Error: " + row.Name + ":  " + error);
+                    }
+                    facilityNamesArray[meta.row] = row.Name;
+                    facilityPhotosArray[meta.row] = row.RollupImage;
+                    facilityLocation[meta.row] = row.Location;
+                    facilityType = row.FacilityType
+                    counter = counter + 1 
+                   
+
+                    
+                    return  result;
+
+            },
+         },  
+         { 
+            targets: 1,
+
+            render: function (data, type, row, meta) {
+
+                var result2 = '';
+                
+                row.Features.forEach(element => {
+                    result2 += element + ",";
+                });
+
+                
+
+                return "<div style='display:none;'>" + result2 + "</div>";
+
+
+            },
+         },    
+        ],
+        "drawCallback": function( settings ) {
+            $("table.foundFacilities thead").remove();
+        },
+        language: {
+            paginate: {
+                previous: '<i class="sprite chevron-left-dark"></i>',
+                next: '<i class="sprite chevron-right-dark"></i>',
+            },
+        },
+        // pagingType: "scrolling",
+        sDom:
+            "<'row'<'col-12'<'datatable-pagination'i<'tab-dom'p>>>>",
+    });
+    counter = 1;
+    
+    setFacilityNames();
+
+    $("table.foundFacilities").on( 'page.dt', function () {
+        facilityNames = "";
+        setFacilityNames();
+    } );
+    
+  }
+
+
+  function setRefiners() {
+    var existingRefiners = '';
+    if (location.href.split("&refiners=")[1] != undefined) {
+     existingRefiners = location.href.split("&refiners=")[1];
+    }
+
+
+ 
+    if (existingRefiners != '') {
+
+        refinerCollection = existingRefiners.split(',');
+    }
+
+    refinerCollection.forEach(function(currentValue, index) {
+
+
+        refinerCollection[index] = decodeURI(currentValue);
+    });
+
+
+    $("#FacilityFeatures-MultiRefiner").find(':checkbox').each(function(){
+
+
+        if (refinerCollection.includes($(this).val())) {
+
+            $(this).prop('checked', 'checked');
+            $("#advancedClearBtn").show();
+        }
+    });
+
+
+
+
+  }
+
+function refineSearch(featureName,checked) {
+
+
+    var url = location.href.split("&refiners=")[0];
+    var existingRefiners = '';
+    if (location.href.split("&refiners=")[1] != undefined) {
+       existingRefiners = location.href.split("&refiners=")[1];
+    }
+ 
+    if (checked) {
+    refinerCollection.push(featureName);
+    } else {
+        const index = refinerCollection.indexOf(featureName);
+        if (index > -1) { 
+            refinerCollection.splice(index, 1);
+        }
+    }
+
+
+    location.href = url + "&refiners=" + refinerCollection.toString();
+
+}
+
+ 
+var rowCount = [];
+
+function setFacilityNames() {
+
+    var startCounter = theDatatable.page() * 50;
+    var endCounter = (theDatatable.page() * 50) + 50;
+
+    for(let x=startCounter; x <  endCounter; x++) {
+        if (x == facilityNamesArray.length) {
+            break;
+        } else {
+            // facilityNames = facilityNames + facilityNamesArray[x] + "|";
+            facilityNames = facilityNames +  facilityNamesArray[x] + "#" +  "" + "<img width='100%' src='" + facilityPhotosArray[x] + "'/>" + facilityNamesArray[x] +  "<br/><span id='GISPopupLocation'>" + facilityLocation[x] + "</span><br/><a href='facility?facilitytype=" + facilityType +"&facilityname=" + facilityNamesArray[x] + "' class='btn'>View Venue</a>|";
+
+        }
+    }
+
+
+}
+
+
+
+function setFacilityListingMap() {
+
+    $('#externalMapDiv').addClass("loading-view");
+    $('#externalMapDiv').hide();
+    
+
+
+
+   
+
+}
+
+function hidePlotMap() {
+
+    //createMultiPointMap(facilityNames, "2041691.3703824093,-4055318.9817469227,2105265.6226164005,-3963535.673497017");
+
+    $('.container.m-t-20.list-cnt').show();
+    $(".section-pull.bottomPaging").show();
+    $('#externalMapDiv').hide();
+
+
+}
+
+function plotMap(facilityType) {
+
+
+
+    $('#externalMapDiv').show();
+    $(".container.m-t-20.list-cnt").hide();
+    $(".section-pull.bottomPaging").hide();
+
+    
+    createMultiPointMap(facilityType, facilityNames, "2041691.3703824093,-4055318.9817469227,2105265.6226164005,-3963535.673497017");
+
+
+}
+
+// var refinerExpanded = "";
+
+function openFilterTab(currentTab) {
+    $(this).slideDown();
+    currentTab.removeClass("closed");
+    currentTab.addClass("open");
+    currentTab[0].lastElementChild.lastElementChild.classList.remove("filter-arrow-down");
+    currentTab[0].lastElementChild.lastElementChild.classList.add("filter-arrow-up");
+    currentTab[0].nextElementSibling.style.display = "block";
+    refinerExpanded = currentTab
+}
+
+function closeFilterTab(currentTab) {
+    currentTab.removeClass("open"); 
+    currentTab.addClass("closed");
+    currentTab[0].lastElementChild.lastElementChild.classList.remove("filter-arrow-up");
+    currentTab[0].lastElementChild.lastElementChild.classList.add("filter-arrow-down");
+    currentTab[0].nextElementSibling.style.display = "none";
+
+}
+
+  var userclicked = 0;
+
+  function apple(userclicked, myArr2) {
+      if (userclicked == '1') {
+
+          $(function () { // document ready
+              if ($('#calendar')) {
+                  $('#calendar').fullCalendar('destroy'); // Destroy the calender and all resource/events.. Ready for next generation
+              }
+              // Define the full calender functionality , attributes
+              // Start  -- Defining Full Calender
+              $('#calendar').fullCalendar({
+
+                  schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+                  themeSystem: 'bootstrap4', // Select Theme system - base is standard or empty ,jquery-ui, bootstrap3
+                  editable: false, // enable draggable events
+                  nowIndicator: true,
+                  contentHeight: "auto",
+                  contentWidth: "auto",
+                  timezone: "Africa/Harare",
+                  firstDay: 1,
+                  navLinks: true,
+                  locale: "en-gb",
+                  businessHours: false,
+                  eventOverlap: false,
+                  slotDuration: '01:00:00',  // Set Time Slot (1 Hour default)
+                  //timeFormat: 'H(:mm)', // uppercase H for 24-hour clock
+                  allDayDefault: false,
+                  aspectRatio: 1.8, // 1.8 Default
+                  scrollTime: '08:00', // undo default 6am scrollTime
+
+                  // Add your event
+                  selectable: false,
+                  selectOverlap: false,
+                  selectHelper: true,
+                  eventBorderColor: "black",
+
+                  eventClick: function (eventObj) {
+                      if (eventObj.url) {
+                          alert(
+                              'Clicked ' + eventObj.title + '.\n' +
+                              'Will open ' + eventObj.url + ' in a new tab'
+                          );
+
+                          window.open(eventObj.url);
+
+                          return false; // prevents browser from following link in current tab.
+                      } else {
+                          //alert('Clicked ' + eventObj.title);
+                          $('#calendar').fullCalendar('changeView', 'timelineDay', eventObj.start);
+                      }
+                  },
+
+                  // Monitor event drop and schedule change
+                  eventDrop: function (event, delta, revertFunc) {
+
+                      eventnewstart = moment(event.start).format("DD MMMM YYYY");
+                      eventnewend = moment(event.end).format("DD MMMM YYYY");
+                      eventnewstarttime = moment(event.start).format("HH");
+                      eventnewendtime = moment(event.end).format("HH");
+
+                      if (!confirm("Confirm new date: " + eventnewstart + " " + eventnewstarttime + "h00 - " + eventnewend + " " + eventnewendtime + "h00")) {
+                          revertFunc();
+                      } else {
+                          // write new selection date
+
+                          document.getElementById("divcaldatespan").innerHTML = "<h3>DATE SELECTION: " + eventnewstart + " - " + eventnewend + "</h3>";
+                          eventnewstarttime = moment(event.start).format("HH:MM");
+                          eventnewendtime = moment(event.end).format("HH:MM");
+                          eventnewstart = moment(event.start).format("DD/MM/YYYY");
+                          eventnewend = moment(event.end).format("DD/MM/YYYY");
+
+                      }
+
+                  },
+
+                  // Monitor event resize and schedule change
+                  eventResizeStop: function (event, delta, revertFunc) {
+
+                      //alert(event.title + " was resized on " + event.start.format());
+                      eventnewstart = moment(event.start).format("DD MMMM YYYY");
+                      eventnewend = moment(event.end).format("DD MMMM YYYY");
+                      eventnewstarttime = moment(event.start).format("HH");
+                      eventnewendtime = moment(event.end).format("HH");
+
+                      if (!confirm("Confirm new date: " + eventnewstart + " " + eventnewstarttime + "h00 - " + eventnewend + " " + eventnewendtime + "h00")) {
+                          revertFunc();
+                      } else {
+                          // write new selection date
+                          document.getElementById("divcaldatespan").innerHTML = "<h3>DATE SELECTION: " + eventnewstart + " - " + eventnewend + "</h3>";
+                          eventnewstarttime = moment(event.start).format("HH:MM");
+                          eventnewendtime = moment(event.end).format("HH:MM");
+                          eventnewstart = moment(event.start).format("DD/MM/YYYY");
+                          eventnewend = moment(event.end).format("DD/MM/YYYY");
+                      }
+
+                  },
+
+                  header: {
+                      left: 'today prev,next',
+                      center: 'title',
+                      right: 'timelineDay,month,listWeek'
+                      //right: 'timelineDay,agendaWeek,month,listWeek'
+                  },
+                  defaultView: 'listWeek',
+                  //listDay, listWeek, listMonth, and listYear
+                  views: {
+                      listWeek: { buttonText: 'list week', noEventsMessage: "No events to display" },
+                      month: {
+                          eventLimit: 3
+                      }, // adjust to 6 only for agendaWeek/agendaDay
+                      agendaWeek: {
+                          eventLimit: 6
+                      }, // adjust to 6 only for agendaWeek/agendaDay
+
+
+                  },
+
+                  resourceOrder: '-type1',
+                  resourceAreaWidth: '40%',
+
+                  resourceColumns: [
+
+                      {
+                          labelText: 'Room',
+                          field: 'title'
+                      },
+
+                  ],
+
+                  //resources: [
+
+                  //    { id: 'Selection', building: '', title: 'Your Selection' },
+
+                  //],
+
+                  resources: resources,
+
+                  events: events,
+
+                  complete: function () {
+                      var events = $(this).fullCalendar('clientEvents');
+                      for (var i in events) {
+                          alert(events[i].title);
+                      }
+                  },
+
+              });
+              // End  -- Defining Full Calender
+              var calroomname = "Spice Room"; //someroom name
+              var y = 1;
+              // ==== EXAMPLE Resource , norw the event Color Codes ==
+              $('#calendar').fullCalendar('addResource', {
+                  id: calroomname,
+                  type1: y, // You can assign a number to this for Resource ordering , it could be the item index in a loop
+                  eventTextColor: '#f00',
+                  title: calroomname,
+                  eventColor: '#e2574c'
+
+              },
+                  false);
+              // END EXAMPLE resource )
+
+              // Example Event(Note the attributes
+              // Create a event
+
+              var yiy = 1;
+              varname = "uniqueevent" + yiy;
+              this[varname] = new Object(); // Create a Selection event object
+              this[varname].id = calroomname;
+              this[varname].resourceId = calroomname;
+              this[varname].description = 'View this event',
+                  this[varname].type1 = yiy; // You can assign a number to this for Event ordering , it could be the item index in a loop
+              this[varname].color = '#e2574c';
+              this[varname].textColor = 'white';
+              this[varname].title = "Unavailable";
+              this[varname].start = "2019-02-01T14:00:00";
+              this[varname].selectOverlap = false;
+              this[varname].end = "2019-02-01T18:00:00";
+              this[varname].overlap = false;
+              // End create a event
+              // Add this event to the calender
+              $('#calendar').fullCalendar('renderEvent', this[varname], true);
+              // Render a RED Background Event for this event and add it to the calender
+              // Render not avaiable blocks in Red background-color
+              $('#calendar').fullCalendar('renderEvent', {
+                  start: "2019-02-01T14:00:00",
+                  end: "2019-02-01T18:00:00",
+                  overlap: false,
+                  rendering: 'background',
+                  color: '#e2574c'
+              }, true);
+              // End - Render Background event
+              // End Example Event
+
+              // Start
+              // Tentative Slot - based on the dates you selected
+
+              $('#calendar').fullCalendar('gotoDate', "2019-01-31T14:00:00"); // Move calender to tentative slot
+
+              var selectionevent = new Object(); // Create a Selection event object
+
+              selectionevent.id = '0';
+              selectionevent.resourceId = 'Selection';
+              selectionevent.description = "Your Date Selection";
+              selectionevent.color = '#324d5b';
+              selectionevent.textColor = '#ffffff';
+              selectionevent.title = "Your Date Selection";
+              selectionevent.description = 'View this event',
+                  selectionevent.type1 = 0;
+              //url: 'http://google.com/',
+              selectionevent.eventOverlap = false;
+              selectionevent.editable = true;
+              selectionevent.displayEventTime = true;
+              selectionevent.start = "2019-01-31T14:00:00";
+              selectionevent.end = "2019-02-05T16:00:00";
+              // Contraint the event to move only in spesific resource array
+              selectionevent.constraint = {
+                  resourceIds: ['Selection'], // constrain dragging to these
+                  /* This constrains it to today or later */
+                  start: moment().format('YYYY-MM-DD'),
+                  end: '2100-01-01' // hard coded  unfortunately
+
+              };
+
+              //Draw Selection on Calendar
+              $('#calendar').fullCalendar('renderEvent', selectionevent, true);
+
+              // END - Tentative Slot
+
+              // Write the Tentative selected datespan on top of the modal
+              document.getElementById("divcaldatespan").innerHTML = "<h3>DATE SELECTION: " + moment(selectionevent.start).format("DD MMMM YYYY") + " - " + moment(selectionevent.end).format("DD MMMM YYYY") + "</h3>";
+              // End write tentative selective datespan
+
+          });
+
+      }
+
+
+  }
+
+
+  function exitfullcalendar() {
+    modal.classList.toggle("closed");
+    modalOverlay.classList.toggle("closed");
+    // Full calender destroy can be placed here if there are issues
+}
+
+function setLocationMap(mapquery, extent, mapquerytype) {
+setTimeout(() => {
+    
+    $('.Location').append($('#externalMapDiv'));
+
+
+    var mapqueryHolder = mapquery;
+    var extentHolder = extent;
+    var mapqueryTypeHolder = mapquerytype;
+
+    if (typeof mapqueryHolder != 'undefined') {
+
+
+        createMap(mapqueryHolder, extentHolder, mapqueryTypeHolder);
+    
+    };
+    
+}, 1000);
+
+    
+}
+
+
+// -------- IMAGES --------
+var windowWidth = $(window).width();
+// Replace img src based on device screen size
+var desktopBreak = 960,
+    tabletBreak = 700,
+    smartBreak = 320,
+    screenWidth = 0,
+    screenHeight = 0,
+    screenType = 'feature';
+
+
+function animateGallery() {
+if ($('.slider').length)
+initAnimateTitleSlide();
+}
+
+// Image Slide Gallery
+function InitializeImageGallerySlider() {
+var imageGalleries = 0;
+$(".image-gallery-slider").each(function () {
+    // Increment the number of galleries
+    imageGalleries++;
+
+
+
+    // Parent elements
+    var gallery = $(this);
+    var galleryContent = gallery.children('.image-gallery-content').first();
+    var galleryControl = gallery.children('.image-gallery-control').first();
+
+    // Important children
+    var galleryCaption = galleryControl.children('.image-gallery-caption').first();
+    var galleryNavInfo = galleryControl.find('.nav-info').first();
+
+    // Swap image sorurce
+    $('.image-gallery-slider img').each(function () {
+        var src = $(this).attr('src');
+        var p = $(this).parent();
+        $(this).css('display', 'none');
+        $(this).attr('src', src);
+        if (screenType == 'feature') {
+            // clean up
+            p.css('background-image', 'none');
+        } else {
+             p.css('background-image', "url('" + src + "')");
+            p.addClass("cover");
+        }
+    });
+
+    // Global variables to this gallery
+    var items = [];
+    var transitionCallback = [];
+    var active = 0;
+
+    // Initialize the gallery
+    initialize();
+
+    // ---------------------------------- //
+
+    function initialize() {
+        // Remove all elements that has transitions
+        $('.slide-left').each(function (index, element) {
+            $(element).removeClass('slide-left');
+        });
+        $('.slide-right').each(function (index, element) {
+            $(element).removeClass('slide-right');
+        });
+
+        // Update the element's height
+        $(gallery).height($(gallery).width() * 0.75);
+        $(galleryContent).height(300);
+
+        // Update the cpation's height based on device
+        if (screenWidth > tabletBreak) {
+            var captionHeight = galleryControl.height();
+            var galleryHeight = $(gallery).height();
+            $(galleryContent).height(galleryHeight - captionHeight);
+        } else {
+            var captionHeight = galleryControl.css("height", "auto");
+            var galleryHeight = $(gallery).css("height", "auto");
+        }
+
+        // Set the button icons
+        $(gallery).find(".slide-next").html("<i class=\"icon arrow-white-next\"></i>");
+        $(gallery).find(".slide-prev").html("<i class=\"icon arrow-white-prev\"></i>");
+        $(gallery).find(".slide-next").on('click', onNextSlide);
+        $(gallery).find(".slide-prev").on('click', onPreviousSlide);
+
+        // Initialize the children
+        var children = galleryContent.children('.itemSlide');
+        for (var i = 0; i < children.length; i++) {
+            var element = children.get(i);
+
+            if (i === 0) {
+                 $(element).css('z-index', 1);
+            } else {
+                $(element).css('z-index', 0);
+            }
+
+            items[i] = {
+                "element": element
+            }
+        }
+
+        // Set up the transition object
+        transitionCallback['transition'] = false;
+
+        // Populate the rest
+        setSelectedSlide(active);
+    }
+
+    function onNextSlide() {
+        // Find the current slide
+        var slide = active;
+        var fromItem = items[slide];
+
+        // Find the next slide
+        slide++;
+        if (slide == items.length) {
+            slide = 0;
+        }
+        var toItem = items[slide];
+
+        // Transition the slide and update
+        transitionSlide(fromItem, toItem, "slide-left");
+        setSelectedSlide(slide);
+    }
+
+    function onPreviousSlide() {
+        // Find the current slide
+        var slide = active;
+        var fromItem = items[slide];
+
+        // Find the next slide
+        slide--;
+        if (slide < 0) {
+            slide = items.length - 1;
+        }
+        var toItem = items[slide];
+
+        // Transition the slide and update
+        transitionSlide(fromItem, toItem, "slide-right");
+        setSelectedSlide(slide);
+    }
+
+    function transitionSlide(fromItem, toItem, transition) {
+        // Remove transition classes from old slide
+        var fromElement = $(fromItem.element);
+        if (fromElement.hasClass('slide-left'))
+            fromElement.removeClass('slide-left');
+        if (fromElement.hasClass('slide-right'))
+            fromElement.removeClass('slide-right');
+
+        // Ensure the previous transition is not interrupted
+        if (transition !== null) {
+            $(transitionCallback['from']).css('z-index', 0);
+            $(transitionCallback['to']).css('z-index', 1);
+            $(transitionCallback['to']).off('webkitAnimationEnd oanimationend msAnimationEnd animationend');
+        }
+
+        // Add transition class to new slide
+        var toElement = $(toItem.element)
+        toElement.addClass(transition);
+        toElement.css('z-index', 2);
+
+        // Set up the callback
+        transitionCallback['transition'] = true;
+        transitionCallback['from'] = fromElement;
+        transitionCallback['to'] = toElement;
+
+        // Set up the new transition
+        toElement.on('webkitAnimationEnd oanimationend msAnimationEnd animationend', function () {
+            fromElement.css('z-index', 0);
+            toElement.css('z-index', 1);
+            toElement.off('webkitAnimationEnd oanimationend msAnimationEnd animationend');
+            transitionCallback['transition'] = false;
+        });                
+    }
+
+    function setSelectedSlide(slide) {
+        // Set the active slide
+        active = slide;
+
+        // Get the new slide's item
+        var item = items[slide];
+
+        // Update the caption
+        updateCaption(item);
+    }
+
+    function updateCaption(item) {
+        // Update the caption
+
+        var caption = $(item.element).children(".image-slide-text");
+       
+        if (caption.length != 0) {
+            var caption = caption.html();
+        
+            if (caption !== null) {
+                // Remove no caption class
+                if (galleryContent.hasClass('no-caption')) {
+                    galleryContent.removeClass('no-caption');
+                }
+
+                // Set the caption
+                galleryCaption.html(caption);
+            } else {
+                galleryCaption.html('');
+                galleryContent.addClass('no-caption');
+            }
+        } else {
+            galleryCaption.html('');
+            galleryContent.addClass('no-caption');
+        }
+
+        // Update the navigation
+        galleryNavInfo.html("" + (active + 1) + " of " + items.length);
+
+    }
+});
+}    
+
+function setGallery() {
+var galleryCounter = 0;
+var checkGalleryExist = setInterval(function () {
+if (galleryCounter < 1000) {
+    if ($(".itemSlide").length) {
+
+        clearInterval(checkGalleryExist);
+        galleryCounter = 0;
+        InitializeImageGallerySlider();                
+
+        $(window).trigger('resize');
+    }
+
+    galleryCounter += 1;
+} else {
+    clearInterval(checkGalleryExist);
+}
+
+}, 100);
+
+
+$(window).resize(function () {
+InitializeImageGallerySlider();
+});
+
+// checkIfRedDisc();
+}
+
+
+
+function setStickyNav() {
+
+// -- SIDE NAV --
+var sectionsData = [];
+var fnSideNavSticky;
+var isOpen = false;
+
+
+// -- STICKY NAV --
+function goToSection() {
+    
+    
+
+    $(".toggleSticky").on('click', function () {
+
+        if (!isOpen) {
+            isOpen = true;
+
+            var goToSectionCounter = 0;
+            var checkGoToSectionExist = setInterval(function () {
+                if (goToSectionCounter < 100) {                    
+                    if ($(".toggleAssistant").length) {
+                        
+                        clearInterval(checkGoToSectionExist);
+                        goToSectionCounter = 0;
+
+                        goToSection();
+                        enableStickyToggleResize();
+                        goToSection();
+
+                        $(".toggleAssistant").slideToggle(250);
+                        $(this).toggleClass("active");
+                        setTimeout(function () {
+                            isOpen = false;
+                        }, 300);                    
+                    }
+                    goToSectionCounter += 1;
+                } else {
+                    clearInterval(checkGoToSectionExist);
+                }
+            }, 1000);           
+        }        
+    });
+
+   
+ }
+
+
+ var goToSectionCounter = 0;
+var checkGoToSectionExist = setInterval(function () {
+    if (goToSectionCounter < 100) {        
+        if ($(".toggleSticky").length) {            
+            clearInterval(checkGoToSectionExist);
+            goToSectionCounter = 0;
+            goToSection();
+            enableStickyToggleResize();
+            goToSection();
+            
+            $(window).trigger('resize');
+
+        }
+        goToSectionCounter += 1;
+    } else {
+        clearInterval(checkGoToSectionExist);
+    }
+}, 1000);
+
+
+
+function resetScreenVars() {
+    screenWidth = $(window).width();
+    screenHeight = $(window).height();
+    if (screenWidth > desktopBreak) {
+        screenType = 'desktop';
+        srcType = 'RenditionID=3';
+    } else if (screenWidth >= tabletBreak) {
+        screenType = 'tablet';
+        srcType = 'RenditionID=2';
+        setGoToSectionTop();
+    } else if (screenWidth >= smartBreak) {
+        screenType = 'mobile';
+        srcType = 'RenditionID=1';
+        setGoToSectionTop();
+    } else {
+        screenType = 'feature';
+        srcType = 'RenditionID=0';
+        setGoToSectionTop();
+    }
+}
+
+
+// close sticky when list item is clicked on mobile
+$(".stickyOpen li a").on('click', function () {
+    resetScreenVars();
+    if ($(window).width() < desktopBreak) {
+        $(".toggleAssistant").slideUp(250);
+        $(".stickyOpen").removeClass("active");
+        $(".toggleSticky").toggleClass("active");
+    }
+});
+
+// run on resize
+function enableStickyToggleResize() {
+    resetScreenVars();
+    if ($(window).width() < desktopBreak) {
+        $(".stickyOpen").addClass('toggleAssistant');
+        $(".stickyOpen").hide();
+        $(".toggleSticky").removeClass("active");
+    } else {
+        $(".stickyOpen").removeClass('toggleAssistant');
+        $(".stickyOpen").show()
+    }
+}
+// run on ready
+function enableStickyToggleMobile() {
+    if ($(window).width() < desktopBreak) {
+        $(".stickyOpen").addClass('toggleAssistant');
+    }
+}
+
+function setupSectionData() {
+    sectionsData.length = 0;
+    $('.pageContent .stickySection').each(function () {
+        var $this = $(this);
+        var btype = 1;
+        var section = $this.attr('id');
+        if (typeof section === 'undefined') section = $this.attr('data-id');
+        var $button = $('.side-nav a[id="#' + section + '"]');
+        var $thisBot = Math.floor($this.offset().top + $this.outerHeight(true));
+        sectionsData.push({
+            el: $this,
+            button: $button,
+            bot: $thisBot
+        });
+    });
+
+
+
+    for (idx = 0; idx < sectionsData.length; idx++) {
+
+        if (idx == 0) {
+            sectionsData[idx].top = 0;
+            sectionsData[idx].button.attr('data-y', sectionsData[idx].el.offset().top);
+        }
+        else {
+            sectionsData[idx].top = sectionsData[idx - 1].bot;
+            sectionsData[idx].button.attr('data-y', sectionsData[idx].top);
+        }
+
+
+    }
+}
+
+
+
+// side nav - filter height
+var filterHeight = $('.sideHeight').height();
+var windowHeight = $(window).height();
+
+function sideNavSticky() {
+    var currentPosition = Math.ceil($(document).scrollTop()); // $(document).scrollTop();
+
+    var pageContent = $('.pageContent');
+    if (pageContent.length > 0) {
+        var scrollStart = pageContent.offset().top - 20;
+
+        if (filterHeight < windowHeight) {
+           
+            if (currentPosition > scrollStart) {
+                $('.sideNavSticky').addClass('sticky');
+
+                var scrollStop = scrollStart + $('.pageContent').outerHeight() - $('.sideHeight').height();
+
+                if (currentPosition > scrollStop) {
+                    var scrollStopTop = $('.pageContent').outerHeight() - $('.sideHeight').height();
+
+                    $('.sideNavSticky').removeClass('sticky');
+                    $('.sideNavSticky').css('top', scrollStopTop);
+                }
+                else {
+                    $('.sideNavSticky').css('top', 78);
+                    
+
+                }
+            }
+            else {
+                $('.sideNavSticky').removeClass('sticky');
+                $('.sideNavSticky').css('top', 30);
+            }
+        }
+
+    }
+   
+   
+}
+
+function sideNavActive() {
+
+    // var currentPosition = Math.ceil($(document).scrollTop()) + 90;
+    var currentPosition = document.body.scrollTop + 77;
+    for (idx = sectionsData.length - 1; idx >= 0; idx--) {
+        if (currentPosition >= sectionsData[idx].top && currentPosition < sectionsData[idx].bot)
+        {
+            sectionsData[idx].button.addClass('active');
+        }
+        else {
+            sectionsData[idx].button.removeClass('active');
+        }
+    }
+    }
+
+
+function setGoToSectionTop() {
+
+    $('.sideNavSticky').css('top', 10);
+
+}
+
+function sideNavScrollTo() {
+    
+    $('.sideNavSticky ul a').click(function (event) {
+        event.preventDefault();
+
+        //go to destination
+        $('html,body').animate({
+            scrollTop: $($(this).attr('href')).offset().top
+        }, 600);
+    });
+}
+
+// Side Navigation
+// sideNavScrollTo();
+setupSectionData();
+
+
+if ($(window).width() >= 1000) {
+    fnSideNavSticky = function () { sideNavSticky() };
+}
+else {
+    fnSideNavSticky = function () { };
+}
+
+
+
+document.addEventListener('scroll', function (event) {
+
+    fnSideNavSticky();
+    sideNavActive();
+
+}, true /*Capture event*/);
+
+fnSideNavSticky();
+sideNavActive();
+goToSection();
+
+
+
+// // The function actually applying the offset
+function offsetAnchor() {   
+    if (location.hash.length !== 0) {
+       document.body.scrollTo(window.scrollX, document.body.scrollTop - 50);
+    }
+  }
+  
+//   // Captures click events of all <a> elements with href starting with #
+  $(document).on('click', 'a[class^="#"]', function(event) {
+    window.setTimeout(function() {
+      offsetAnchor();
+    }, 0);
+  });
+  
+//   // Set the offset when entering page with hash present in the url
+  window.setTimeout(offsetAnchor, 0);
+
+
+
+
+}
+
+

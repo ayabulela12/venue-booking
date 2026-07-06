@@ -62,7 +62,7 @@ export function BookingDetailSheet({
   onOpenChange,
 }: BookingDetailSheetProps) {
   const { getVenueById, confirmBooking, denyBooking, cancelBooking, deleteBooking } = useStore()
-  const { isAdmin, isOperator } = useRole()
+  const { isAdmin, isLocalAdmin, isOperator } = useRole()
   const [isProcessing, setIsProcessing] = useState(false)
 
   if (!booking) return null
@@ -302,7 +302,7 @@ export function BookingDetailSheet({
             </>
           )}
 
-          {(isAdmin || isOperator) && booking.status !== "cancelled" && booking.status !== "denied" && (
+          {(isAdmin || isLocalAdmin || isOperator) && booking.status !== "cancelled" && booking.status !== "denied" && (
             <>
               <Separator />
               <div className="flex flex-col gap-2">

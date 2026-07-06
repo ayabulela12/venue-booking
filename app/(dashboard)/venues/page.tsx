@@ -21,23 +21,36 @@ import { VenueBookingForm } from "@/components/venue-booking-form"
 import type { VenueType } from "@/lib/types"
 
 export default function VenuesPage() {
-  const { state } = useStore()
-  const { isAdmin, isOperator } = useRole()
+  const { state, isReady, refreshVenues } = useStore()
+  const { isSystemAdmin, isDistrictManager, isLocalAdmin } = useRole()
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<VenueType | "all">("all")
+  const [municipalityFilter, setMunicipalityFilter] = useState<string>("all")
   const [formOpen, setFormOpen] = useState(false)
   const [bookingFormOpen, setBookingFormOpen] = useState<string | null>(null)
 
+  const venues = state.venues
+  const isLoading = !isReady
+
   const filteredVenues = useMemo(() => {
-    return state.venues.filter((v) => {
+    return venues.filter((v) => {
+      const matchesMunicipality =
+        municipalityFilter === "all" || v.municipality === municipalityFilter
       const matchesSearch =
         v.name.toLowerCase().includes(search.toLowerCase()) ||
-        v.ownerName.toLowerCase().includes(search.toLowerCase()) ||
+        v.ownerName?.toLowerCase().includes(search.toLowerCase()) ||
         v.address.toLowerCase().includes(search.toLowerCase())
       const matchesType = typeFilter === "all" || v.type === typeFilter
-      return matchesSearch && matchesType
+      return matchesMunicipality && matchesSearch && matchesType
     })
-  }, [state.venues, search, typeFilter])
+  }, [venues, search, typeFilter, municipalityFilter])
+
+  const handleFormOpenChange = (open: boolean) => {
+    setFormOpen(open)
+    if (!open) {
+      void refreshVenues().catch(() => {})
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -47,13 +60,11 @@ export default function VenuesPage() {
             Venue Management
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isAdmin ? "Browse and manage event venues across Green Point" : "Browse event venues across Green Point"}
+            Browse and manage event venues across Capricorn District
           </p>
         </div>
-        {isAdmin && (
-          <Button
-            onClick={() => setFormOpen(true)}
-          >
+        {(isSystemAdmin || isDistrictManager) && (
+          <Button onClick={() => setFormOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Venue
           </Button>
@@ -71,6 +82,21 @@ export default function VenuesPage() {
           />
         </div>
         <Select
+          value={municipalityFilter}
+          onValueChange={(val) => setMunicipalityFilter(val)}
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="All Municipalities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Municipalities</SelectItem>
+            <SelectItem value="polokwane">Polokwane</SelectItem>
+            <SelectItem value="blouberg">Blouberg</SelectItem>
+            <SelectItem value="molemole">Molemole</SelectItem>
+            <SelectItem value="lepel">Lepelle-Nkumpi</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
           value={typeFilter}
           onValueChange={(val) => setTypeFilter(val as VenueType | "all")}
         >
@@ -86,7 +112,11 @@ export default function VenuesPage() {
         </Select>
       </div>
 
-      {filteredVenues.length === 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-muted-foreground">Loading venues...</p>
+        </div>
+      ) : filteredVenues.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-muted-foreground">No venues found.</p>
         </div>
@@ -124,7 +154,7 @@ export default function VenuesPage() {
                   <h3 className="font-semibold text-sm text-primary leading-tight group-hover:underline underline-offset-2">
                     {venue.name}
                   </h3>
-                  {isOperator && (
+                  {isLocalAdmin && (
                     <Button
                       size="sm"
                       onClick={(e) => {
@@ -145,7 +175,9 @@ export default function VenuesPage() {
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Users className="h-3 w-3 shrink-0" />
-                  <span>Capacity: {venue.maxPopulation.toLocaleString()}</span>
+                  <span>
+                    Capacity: {venue.maxPopulation?.toLocaleString() || "N/A"}
+                  </span>
                 </div>
               </div>
             </Link>
@@ -153,20 +185,17 @@ export default function VenuesPage() {
         </div>
       )}
 
-      {isAdmin && (
-        <VenueFormDialog
-          open={formOpen}
-          onOpenChange={setFormOpen}
-        />
+      {(isSystemAdmin || isDistrictManager) && (
+        <VenueFormDialog open={formOpen} onOpenChange={handleFormOpenChange} />
       )}
 
-      {isOperator && (
+      {isLocalAdmin && (
         <VenueBookingForm
           open={!!bookingFormOpen}
           onOpenChange={(open) => {
             if (!open) setBookingFormOpen(null)
           }}
-          venue={state.venues.find(v => v.id === bookingFormOpen)}
+          venue={state.venues.find((v) => v.id === bookingFormOpen)}
         />
       )}
     </div>

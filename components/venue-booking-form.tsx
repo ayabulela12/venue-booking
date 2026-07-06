@@ -32,6 +32,8 @@ import { ConflictAlertPanel } from "@/components/conflict-alert-panel"
 import { cn } from "@/lib/utils"
 import type { Venue, RiskLevel, ConflictResult } from "@/lib/types"
 import { toast } from "sonner"
+import { getSupabaseClient } from "@/lib/supabase-client"
+import { useRole } from "@/components/role-provider"
 
 interface VenueBookingFormProps {
   open: boolean
@@ -39,10 +41,15 @@ interface VenueBookingFormProps {
   venue?: Venue // Make venue optional to handle undefined case
 }
 
+function defaultOrganizerFromSession(): string {
+  return "Local Admin"
+}
+
 export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingFormProps) {
   const { state, addBooking } = useStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+  const [defaultOrganizer, setDefaultOrganizer] = useState(defaultOrganizerFromSession)
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -51,11 +58,51 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
     startTime: "09:00",
     endTime: "17:00",
     expectedAttendance: 100,
-    organizer: "Test Operator", // Default for operators
+    organizer: defaultOrganizerFromSession(),
     riskLevel: "low" as RiskLevel,
     amplifiedNoise: false,
     liquorLicense: false,
   })
+
+  useEffect(() => {
+    if (!open) return
+    void getSupabaseClient()
+      .auth.getUser()
+      .then(({ data: { user } }) => {
+        const name =
+          (typeof user?.user_metadata?.full_name === "string" &&
+            user.user_metadata.full_name) ||
+          (typeof user?.user_metadata?.name === "string" &&
+            user.user_metadata.name) ||
+          user?.email?.split("@")[0] ||
+          defaultOrganizerFromSession()
+        setDefaultOrganizer(name)
+        setFormData((prev) =>
+          prev.organizer === defaultOrganizerFromSession() ||
+          prev.organizer === "Test Operator"
+            ? { ...prev, organizer: name }
+            : prev
+        )
+      })
+  }, [open])
+
+  const todayStart = useMemo(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
+  useEffect(() => {
+    if (venue?.id) {
+      setFormData((prev) => ({ ...prev, venueId: venue.id }))
+    }
+  }, [venue?.id])
+
+  useEffect(() => {
+    if (formData.date && formData.date < todayStart) {
+      setFormData((prev) => ({ ...prev, date: todayStart }))
+    }
+  }, [formData.date, todayStart])
 
   // Automatic risk assessment based on booking parameters
   const calculatedRiskLevel = useMemo(() => {
@@ -82,11 +129,11 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
   }, [formData.amplifiedNoise, formData.liquorLicense, formData.expectedAttendance, venue?.type])
 
   const conflicts = useMemo(() => {
-    if (!formData.date || !formData.startTime || !formData.endTime || !venue?.id) return []
+    if (!formData.date || !formData.startTime || !formData.endTime || !formData.venueId) return []
     
     return detectConflicts(
       {
-        venueId: venue?.id || "",
+        venueId: formData.venueId,
         date: format(formData.date, "yyyy-MM-dd"),
         startTime: formData.startTime,
         endTime: formData.endTime,
@@ -98,10 +145,14 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
       state.bookings,
       state.venues
     )
-  }, [formData.date, formData.startTime, formData.endTime, formData.expectedAttendance, formData.amplifiedNoise, formData.liquorLicense, calculatedRiskLevel, venue?.id, state.bookings, state.venues])
+  }, [formData.date, formData.startTime, formData.endTime, formData.expectedAttendance, formData.amplifiedNoise, formData.liquorLicense, formData.venueId, calculatedRiskLevel, state.bookings, state.venues])
 
   async function handleSubmit() {
-    if (isSubmitting || conflicts.length > 0 || !formData.date || !formData.organizer.trim()) {
+    if (isSubmitting || conflicts.length > 0 || !formData.venueId || !formData.date || !formData.organizer.trim()) {
+      if (!formData.venueId) {
+        toast.error("Please select a venue")
+        return
+      }
       if (!formData.organizer.trim()) {
         toast.error("Please enter an organizer name")
         return
@@ -130,7 +181,7 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
         startTime: "09:00",
         endTime: "17:00",
         expectedAttendance: 100,
-        organizer: "Test Operator", // Default for operators
+        organizer: defaultOrganizer,
         riskLevel: "low",
         amplifiedNoise: false,
         liquorLicense: false,
@@ -224,7 +275,12 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
                     <Calendar
                       mode="single"
                       selected={formData.date}
-                      onSelect={(date) => setFormData(prev => ({ ...prev, date }))}
+                      onSelect={(date) => {
+                        if (!date) return
+                        if (date < todayStart) return
+                        setFormData((prev) => ({ ...prev, date }))
+                      }}
+                      disabled={(date) => date < todayStart}
                       required
                       initialFocus
                     />
@@ -336,7 +392,7 @@ export function VenueBookingForm({ open, onOpenChange, venue }: VenueBookingForm
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={isSubmitting || conflicts.length > 0 || !formData.date}
+            disabled={isSubmitting || conflicts.length > 0 || !formData.venueId || !formData.date}
           >
             {isSubmitting ? "Creating..." : "Book Venue"}
           </Button>

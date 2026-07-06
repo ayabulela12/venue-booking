@@ -1,0 +1,49 @@
+var modal;
+var modalOverlay;
+var openButton;
+
+function startModal() {
+modal = document.querySelector("#modal");
+console.log(modal);
+modalOverlay = document.querySelector("#modal-overlay");
+openButton = document.querySelector("#open-button");
+
+$('.daterangepicker').css({ 'display': "none" });
+}
+
+function toggleModal() {
+    modal.classList.toggle("closed");
+    modalOverlay.classList.toggle("closed");
+    apple();  // Run Full calender Construction
+}
+
+function toggleCloseModal() {
+    modal.classList.toggle("closed");
+    modalOverlay.classList.toggle("closed");
+}
+
+
+function windowOnClick(event) {
+    if (event.target === modal) {
+        toggleModal();
+    }
+    //event.preventDefault()
+}
+
+// window.onload = function () {
+//     try {
+function setEventListener() {
+        var el = document.getElementById("open-button");
+        el.addEventListener("click", toggleModal);
+}
+        //  mb.addEventListener("click", handler2);
+//     } catch (error) { console.log(error); }
+// }
+
+
+window.addEventListener("click", windowOnClick);
+
+// Checkbox button fix
+
+$("#s4-workspace .hero.global").css('display', 'none');
+    

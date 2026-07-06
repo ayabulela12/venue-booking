@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from "react"
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef, useState } from "react"
 import type {
   AppState,
   Venue,
@@ -49,8 +49,19 @@ type Action =
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
-    case "SET_STATE":
-      return action.payload
+    case "SET_STATE": {
+      const incomingVenueIds = new Set(action.payload.venues.map((v) => v.id))
+      const localOnlyVenues = state.venues.filter((v) => !incomingVenueIds.has(v.id))
+      const incomingBookingIds = new Set(action.payload.bookings.map((b) => b.id))
+      const localOnlyBookings = state.bookings.filter(
+        (b) => !incomingBookingIds.has(b.id)
+      )
+      return {
+        ...action.payload,
+        venues: [...action.payload.venues, ...localOnlyVenues],
+        bookings: [...action.payload.bookings, ...localOnlyBookings],
+      }
+    }
     case "ADD_VENUE":
       return { ...state, venues: [...state.venues, action.payload] }
     case "UPDATE_VENUE":
@@ -96,8 +107,9 @@ function reducer(state: AppState, action: Action): AppState {
 
 interface StoreContextValue {
   state: AppState
+  isReady: boolean
   dispatch: React.Dispatch<Action>
-  addVenue: (venue: Venue) => void
+  addVenue: (venue: Omit<Venue, "createdAt"> & { id?: string }) => Promise<void>
   updateVenue: (venue: Venue) => void
   deleteVenue: (id: string) => void
   addBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => void
@@ -109,6 +121,8 @@ interface StoreContextValue {
   addTriggerLog: (log: TriggerLog) => void
   addOverrideLog: (log: OverrideLog) => void
   getVenueById: (id: string) => Venue | undefined
+  syncVenue: (venue: Venue) => void
+  refreshVenues: () => Promise<void>
   getBookingsByVenue: (venueId: string) => Booking[]
   getBookingsByDate: (date: string) => Booking[]
 }
@@ -117,14 +131,25 @@ const StoreContext = createContext<StoreContextValue | null>(null)
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const [isReady, setIsReady] = useState(false)
+  const stateRef = useRef(state)
+
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
 
   // Fetch initial data
   useEffect(() => {
-    fetchInitialData().then((initialData) => {
-      dispatch({ type: "SET_STATE", payload: initialData })
-    }).catch((error) => {
-      console.error("Error loading initial data:", error)
-    })
+    fetchInitialData()
+      .then((initialData) => {
+        dispatch({ type: "SET_STATE", payload: initialData })
+      })
+      .catch((error) => {
+        console.error("Error loading initial data:", error)
+      })
+      .finally(() => {
+        setIsReady(true)
+      })
   }, [])
 
   // Set up real-time subscriptions
@@ -138,8 +163,29 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [dispatch])
 
+  const upsertVenueFromRealtime = useCallback(
+    (venue: Venue) => {
+      const exists = stateRef.current.venues.some((v) => v.id === venue.id)
+      dispatch({
+        type: exists ? "UPDATE_VENUE" : "ADD_VENUE",
+        payload: venue,
+      })
+    },
+    [dispatch]
+  )
+
+  useEffect(() => {
+    const subscription = subscribeToVenues((venue) => {
+      upsertVenueFromRealtime(venue)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [upsertVenueFromRealtime])
+
   const addVenue = useCallback(
-    async (venue: Venue) => {
+    async (venue: Omit<Venue, "createdAt"> & { id?: string }) => {
       try {
         const newVenue = await createVenue(venue)
         dispatch({ type: "ADD_VENUE", payload: newVenue })
@@ -170,7 +216,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         await deleteVenueFromDB(id)
         dispatch({ type: "DELETE_VENUE", payload: id })
       } catch (error) {
-        console.error("Error deleting venue:", error)
+        console.error(
+          "Error deleting venue:",
+          error instanceof Error ? error.message : error
+        )
         throw error
       }
     },
@@ -307,6 +356,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [state.venues]
   )
 
+  const syncVenue = useCallback(
+    (venue: Venue) => {
+      upsertVenueFromRealtime(venue)
+    },
+    [upsertVenueFromRealtime]
+  )
+
+  const refreshVenues = useCallback(async () => {
+    try {
+      const venues = await fetchVenues()
+      dispatch({
+        type: "SET_STATE",
+        payload: { ...stateRef.current, venues },
+      })
+    } catch (error) {
+      console.error("Error refreshing venues:", error)
+      throw error
+    }
+  }, [])
+
   const getBookingsByVenue = useCallback(
     (venueId: string) => state.bookings.filter((b) => b.venueId === venueId),
     [state.bookings]
@@ -320,6 +389,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     <StoreContext.Provider
       value={{
         state,
+        isReady,
         dispatch,
         addVenue,
         updateVenue,
@@ -333,6 +403,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         addTriggerLog,
         addOverrideLog,
         getVenueById,
+        syncVenue,
+        refreshVenues,
         getBookingsByVenue,
         getBookingsByDate,
       }}

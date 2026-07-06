@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { MasterCalendar } from "@/components/master-calendar"
 import {
   Select,
@@ -13,32 +13,35 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { useStore } from "@/lib/store"
 import { useRole } from "@/components/role-provider"
+import { filterBookingsForUser } from "@/lib/booking-filters"
 import type { RiskLevel } from "@/lib/types"
 
 export default function CalendarPage() {
   const { state } = useStore()
-  const { isOperator, isAdmin } = useRole()
+  const { role, isLocalAdmin, isOperator, userId } = useRole()
   const [riskFilter, setRiskFilter] = useState<RiskLevel | "all">("all")
   const [venueFilter, setVenueFilter] = useState("all")
   const [noiseFilter, setNoiseFilter] = useState(false)
   const [liquorFilter, setLiquorFilter] = useState(false)
 
-  // Operator-specific: Show only operator's bookings
-  const operatorBookings = isOperator 
-    ? state.bookings.filter(b => b.organizer === "Test Operator" && b.status !== "cancelled" && b.status !== "denied")
-    : state.bookings.filter(b => b.status !== "cancelled" && b.status !== "denied")
+  const visibleBookings = useMemo(
+    () =>
+      filterBookingsForUser(state.bookings, state.venues, { role, userId }),
+    [state.bookings, state.venues, role, userId]
+  )
 
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-balance">
-          {isOperator ? "My Calendar" : "Master Calendar"}
+          {isLocalAdmin || isOperator ? "My Calendar" : "Master Calendar"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {isOperator 
-            ? "View your scheduled events and manage bookings"
-            : "View all scheduled events with conflict visualization"
-          }
+          {isLocalAdmin
+            ? "View events you have booked"
+            : isOperator
+              ? "View your scheduled events and manage bookings"
+              : "View all scheduled events with conflict visualization"}
         </p>
       </div>
 
@@ -73,7 +76,9 @@ export default function CalendarPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{isOperator ? "All My Venues" : "All Venues"}</SelectItem>
+              <SelectItem value="all">
+                {isLocalAdmin || isOperator ? "All My Venues" : "All Venues"}
+              </SelectItem>
               {state.venues.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
                   {v.name}
@@ -107,7 +112,7 @@ export default function CalendarPage() {
       </div>
 
       <MasterCalendar
-        bookings={operatorBookings}
+        bookings={visibleBookings}
         riskFilter={riskFilter}
         venueFilter={venueFilter}
         noiseFilter={noiseFilter}

@@ -1,0 +1,432 @@
+﻿var externalMap = '';
+
+function createMultiPointMap(facilityType, mapquerys, extentvar) {
+
+    
+    setTimeout(function () {
+        require([
+            "esri/config",
+            "esri/SpatialReference",
+            "esri/geometry/Extent",
+            "esri/map",
+            "esri/layers/ArcGISTiledMapServiceLayer",
+            "esri/layers/GraphicsLayer",
+            "esri/tasks/query",
+            "esri/tasks/QueryTask",
+            "esri/graphic",
+            "esri/symbols/PictureMarkerSymbol",
+            "esri/layers/ArcGISDynamicMapServiceLayer",
+            "esri/InfoTemplate",
+            "esri/geometry/Point",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/Color",
+            "esri/symbols/Symbol",
+            "dojo/parser",
+            "dojo/domReady!"
+        ],
+            function (
+                esriConfig,
+                SpatialReference,
+                Extent,
+                Map,
+                ArcGISTiledMapServiceLayer,
+                GraphicsLayer,
+                Query,
+                QueryTask,
+                Graphic,
+                PictureMarkerSymbol,
+                ArcGISDynamicMapServiceLayer,
+                InfoTemplate,
+                Point,
+                SimpleMarkerSymbol,
+                Color,
+                Symbol,
+                parser
+            ) {
+
+                //**************************************************************************************************************************************
+                //  Configuration Section
+                //**************************************************************************************************************************************
+
+                parser.parse();
+
+                //Create map layers
+                terrain_extLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Background_Maps/Base_Data_Terrain_Ext/MapServer', {
+                    id: "rerrain_extLayer"
+                });
+                terrain_extLabelLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Background_Maps/Base_Data_Terrain_Ext_Labels/MapServer', {
+                    id: "rerrain_extLabelLayer"
+                });
+                base_Data_LowLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Background_Maps/Base_Data_Low_Detail_Ext/MapServer', {
+
+                    id: "rerrain_lowLayer"
+                });
+                land_TopoLayer = new ArcGISDynamicMapServiceLayer('https://cityimg.capetown.gov.za/erdas-iws/esri/GeoSpatial%20Datasets/rest/services/Digital%20Maps_Topo%201990_1:50%20000/MapServer', {
+                    id: "rerrain_TopoLayer"
+                });
+
+                land_StreetLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Theme_Based/Facility_Booking_Streets/MapServer', {
+                    id: "rerrain_StreetLayer"
+                });
+
+                graphicsLayer = new GraphicsLayer({
+                    id: "graphicsLayer"
+                });
+
+
+
+
+                var GisLayer = "";
+                
+                if (facilityType === 'Community centres') {
+                    GisLayer = "https://citymaps.capetown.gov.za/agsext/rest/services/Search_Layers/SL_FCLT_BKNG/MapServer/0";
+                } else if (facilityType === 'Resorts') {
+
+                    GisLayer = "https://citymaps.capetown.gov.za/agsext/rest/services/Search_Layers/SL_FCLT_BKNG/MapServer/1";
+                }
+                //**************************************************************************************************************************************
+                //  global variable Section
+                //**************************************************************************************************************************************				 
+
+                var clusterLayer;
+
+
+                //**************************************************************************************************************************************
+                //  Map Section
+                //**************************************************************************************************************************************			
+
+                var spatialRef = new esri.SpatialReference({ wkid: 3857 });
+
+
+                var mapExtent = new esri.geometry.Extent();
+                mapExtent.xmin = 2008213.5101003135;
+                mapExtent.ymin = -4041406.4906377587;
+                mapExtent.xmax = 2110084.647175921;
+                mapExtent.ymax = -4014313.1031176504;
+
+                mapExtent.spatialReference = spatialRef;
+                
+                if (externalMap === "") {
+
+                    //Create a new map.
+                    externalMap = new Map("externalMapDiv", {
+                        extent: mapExtent,
+                        logo: false
+                    });
+                } else {
+
+                    clearGraphics(externalMap);
+                }
+
+            //Add layers to the map, take note of the order.
+                externalMap.addLayers([land_TopoLayer, terrain_extLayer, base_Data_LowLayer, terrain_extLabelLayer, land_StreetLayer, graphicsLayer ]);
+                // externalMap.graphics.clear();
+
+            var mapqueryArray = mapquerys.split('|');
+            var lastone = 0;
+            
+            for (var i = 0, len = mapqueryArray.length; i < len; i++) {
+
+                var mapqueryArrayText = mapqueryArray[i].split('#')[0];
+
+     
+
+                var addressQuery = new Query();
+                addressQuery.where = "NAME = '" + mapqueryArrayText + "'";
+                addressQuery.outFields = ["*"];
+                addressQuery.returnGeometry = true;
+
+                var addressQueryTask = new QueryTask(GisLayer);
+
+            
+                addressQueryTask.on("complete", displayAddress);
+                addressQueryTask.execute(addressQuery);
+                
+            }
+
+            var mapqueryArrayContent = "";
+
+            function displayAddress(result) {
+
+                try {
+                    var featureSet = result.featureSet;
+                     if (featureSet.features[0] != undefined) {
+                    var geometry = featureSet.features[0].geometry;
+                    if (geometry.type != 'point') {
+                        geometry = geometry.getCentroid();
+                    }
+
+                    var itemName = featureSet.features[0].attributes;
+
+                    mapqueryArrayContent = "";
+                    var pictureMarker = "";
+                    for (var x = 0, len = mapqueryArray.length; x < len; x++) {
+
+                        if (mapqueryArray[x].indexOf(itemName['NAME'].trim()) !== -1) {
+
+                            var y = x + 1;
+                            mapqueryArrayContent = mapqueryArray[x];
+                            pictureMarker = new PictureMarkerSymbol("assets/images/FacilityBookingPins/pin" + y + ".png", 28, 40)
+                            pictureMarker = eval(pictureMarker);
+                            break;
+                        }
+                    }
+
+                    var graphic = new Graphic(geometry, pictureMarker, mapqueryArrayContent);
+                    try {
+
+                        externalMap.graphics.add(graphic);
+                        
+                    } catch (error) {
+                        
+                        console.log("Error with geometry: " + mapqueryArrayContent);
+                                           }
+                    dojo.connect(externalMap.graphics, "onClick", function (evt) {
+                        var g = evt.graphic;
+
+                        var content = g.attributes.split('#')[1];
+                        externalMap.infoWindow.setContent("<div class='contentPane'> " + content + "</div>");
+                        externalMap.infoWindow.setTitle(g.getTitle());
+
+                        externalMap.infoWindow.show(evt.screenPoint, externalMap.getInfoWindowAnchor(evt.screenPoint));
+                    
+                    });
+
+                 }
+                } catch (error) {
+                    console.log(error);
+                }
+                
+            }
+             });
+
+
+
+}, 1000);
+
+}
+
+function clearGraphics(externalMap) {
+    //first remove all graphics added directly to map
+    externalMap.graphics.clear();
+
+    //now go into each graphic layer and clear it
+    var graphicLayerIds = externalMap.graphicsLayerIds;
+    var len = graphicLayerIds.length;
+    for (var i = 0; i < len; i++) {
+        var gLayer = externalMap.getLayer(graphicLayerIds[i]);
+        //clear this Layer
+        gLayer.clear();
+    }
+
+}
+
+
+
+function createMap(mapquery, extentvar, mapquerytype) {
+
+    console.log(mapquery);
+
+    setTimeout(function () {
+
+        // setTimeout(function () { 
+        require([
+            "esri/config",
+            "esri/SpatialReference",
+            "esri/geometry/Extent",
+            "esri/map",
+            "esri/layers/ArcGISTiledMapServiceLayer",
+            "esri/layers/GraphicsLayer",
+            "esri/tasks/query",
+            "esri/tasks/QueryTask",
+            "esri/graphic",
+            "esri/symbols/PictureMarkerSymbol",
+            "esri/layers/ArcGISDynamicMapServiceLayer",
+            "esri/InfoTemplate",
+            "esri/geometry/Point",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/Color",
+            "esri/symbols/Symbol",
+            "dojo/parser",
+            "dojo/domReady!"
+        ],
+            function (
+                esriConfig,
+                SpatialReference,
+                Extent,
+                Map,
+                ArcGISTiledMapServiceLayer,
+                GraphicsLayer,
+                Query,
+                QueryTask,
+                Graphic,
+                PictureMarkerSymbol,
+                ArcGISDynamicMapServiceLayer,
+                InfoTemplate,
+                Point,
+                SimpleMarkerSymbol,
+                Color,
+                Symbol,
+                parser
+            ) {
+
+                //**************************************************************************************************************************************
+                //  Configuration Section
+                //**************************************************************************************************************************************
+
+                parser.parse();
+
+                //Create map layers
+                terrain_extLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Background_Maps/Base_Data_Terrain_Ext/MapServer', {
+                    id: "rerrain_extLayer"
+                });
+                terrain_extLabelLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Background_Maps/Base_Data_Terrain_Ext_Labels/MapServer', {
+                    id: "rerrain_extLabelLayer"
+                });
+                base_Data_LowLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Background_Maps/Base_Data_Low_Detail_Ext/MapServer', {
+                    id: "rerrain_lowLayer"
+                });
+                land_TopoLayer = new ArcGISDynamicMapServiceLayer('https://cityimg.capetown.gov.za/erdas-iws/esri/GeoSpatial%20Datasets/rest/services/Digital%20Maps_Topo%201990_1:50%20000/MapServer', {
+                    id: "rerrain_TopoLayer"
+                });
+
+                land_StreetLayer = new ArcGISDynamicMapServiceLayer('https://citymaps.capetown.gov.za/agsext/rest/services/Theme_Based/Facility_Booking_Streets/MapServer', {
+                    id: "rerrain_StreetLayer"
+                });
+
+                graphicsLayer = new GraphicsLayer({
+                    id: "graphicsLayer"
+                });
+
+                var GisLayer = "";
+               
+                if (mapquerytype === 'Community centres') {
+                    GisLayer = "https://citymaps.capetown.gov.za/agsext/rest/services/Search_Layers/SL_FCLT_BKNG/MapServer/0";
+                } else if (mapquerytype === 'Resorts') {
+                    GisLayer = "https://citymaps.capetown.gov.za/agsext/rest/services/Search_Layers/SL_FCLT_BKNG/MapServer/1";
+                }
+
+                //**************************************************************************************************************************************
+                //  global variable Section
+                //**************************************************************************************************************************************				 
+
+                var clusterLayer;
+
+
+                //**************************************************************************************************************************************
+                //  Map Section
+                //**************************************************************************************************************************************			
+
+                var spatialRef = new esri.SpatialReference({ wkid: 3857 });
+
+
+                var mapExtent = new esri.geometry.Extent();
+                mapExtent.xmin = 2008213.5101003135;
+                mapExtent.ymin = -4041406.4906377587;
+                mapExtent.xmax = 2110084.647175921;
+                mapExtent.ymax = -4014313.1031176504;
+
+                mapExtent.spatialReference = spatialRef;
+
+                
+
+                //Create a new map.
+                externalMap = new Map("externalMapDiv", {
+                    extent: mapExtent,
+                    logo: false
+                });
+
+                //Add layers to the map, take note of the order.
+                externalMap.addLayers([land_TopoLayer, terrain_extLayer, base_Data_LowLayer, terrain_extLabelLayer, land_StreetLayer, graphicsLayer]);
+
+                var mapqueryArray = mapquery.split('|');
+
+                for (var i = 0, len = mapqueryArray.length; i < len; i++) {
+
+                    var mapqueryArrayText = mapqueryArray[i].split('#')[0];
+                    var addressQuery = new Query();
+                    addressQuery.where = "NAME = '" + mapqueryArrayText.replace("'", "''").replace("’","''") + "'";;
+                    addressQuery.outFields = ["*"];
+                    addressQuery.returnGeometry = true;
+                    var addressQueryTask = new QueryTask(GisLayer);
+
+                    addressQueryTask.on("complete", displayAddress);
+                    addressQueryTask.execute(addressQuery);
+                }
+
+                var mapqueryArrayContent = "";
+
+                
+
+                function displayAddress(result) {
+
+                    try {
+                        var featureSet = result.featureSet;
+                        var geometry = featureSet.features[0].geometry;
+                        if (geometry.type != 'point') {
+                            geometry = geometry.getCentroid();
+                        }
+
+                        var itemName = featureSet.features[0].attributes;
+
+                        mapqueryArrayContent = "";
+                        var pictureMarker = "";
+                        for (var x = 0, len = mapqueryArray.length; x < len; x++) {
+
+                            if (mapqueryArray[x].indexOf(itemName['NAME'].trim()) !== -1) {
+
+                                var y = x + 1;
+                                mapqueryArrayContent = mapqueryArray[x];
+                                pictureMarker = new PictureMarkerSymbol("assets/images/FacilityBookingPins/pin" + y + ".png", 28, 40)
+                                pictureMarker = eval(pictureMarker);
+                                break;
+                            }
+                        }
+
+                        var graphic = new Graphic(geometry, pictureMarker, mapqueryArrayContent);
+                        try {
+                            externalMap.centerAndZoom(geometry, 0.05);
+                            externalMap.graphics.add(graphic);
+                            
+
+                        } catch (error) {
+                            console.log("Error with geometry: " + mapqueryArrayContent);
+                        }
+
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            });
+
+            $('.Map').hide();
+    }, 2000);
+
+}
+
+//$(document).ready(function () {
+
+//    setTimeout(function () {
+
+//        $("#externalMapDiv_graphics_layer image").click(function () {
+
+//            $(".esriPopupWrapper").show();
+//            $(".outerPointer").show();
+
+//        });
+
+
+//    }, 3000);
+
+//});
+
+function setupMap() {
+//if (typeof mapqueryHolder != 'undefined') {
+
+
+    createMap(mapqueryHolder, extentHolder, mapqueryTypeHolder);
+
+//};
+}
+
+

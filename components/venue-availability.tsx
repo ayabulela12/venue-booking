@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { format } from "date-fns"
 import { CalendarIcon, CalendarDays } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,6 +20,16 @@ interface VenueAvailabilityProps {
 export function VenueAvailability({ venue }: VenueAvailabilityProps) {
   const { state } = useStore()
   const [selectedDate, setSelectedDate] = useState(new Date())
+
+  const todayStart = useMemo(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
+  useEffect(() => {
+    if (selectedDate < todayStart) setSelectedDate(todayStart)
+  }, [selectedDate, todayStart])
   
   const venueBookings = useMemo(() => 
     state.bookings.filter(b => 
@@ -72,7 +82,12 @@ export function VenueAvailability({ venue }: VenueAvailabilityProps) {
               <Calendar
                 mode="single"
                 selected={selectedDate}
-                onSelect={setSelectedDate}
+                onSelect={(date) => {
+                  if (!date) return
+                  if (date < todayStart) return
+                  setSelectedDate(date)
+                }}
+                disabled={(date) => date < todayStart}
                 required
                 initialFocus
               />

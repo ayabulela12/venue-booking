@@ -4,7 +4,9 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRole } from "@/components/role-provider"
+import { useNotifications } from "@/app/(dashboard)/layout"
 import { 
   Users, 
   Plus,
@@ -13,69 +15,168 @@ import {
   Shield,
   MapPin,
   Building,
-  UserCheck
+  UserCheck,
+  Trash2,
+  Ban
 } from "lucide-react"
+import { createClient } from "@supabase/supabase-js"
+import { UserDetailSheet } from "@/components/user-detail-sheet"
+import { UserEditForm } from "@/components/user-edit-form"
+import { UserCreateForm } from "@/components/user-create-form"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
 export default function UsersPage() {
   const { isSystemAdmin, isDistrictManager } = useRole()
-  const [showCreateForm, setShowCreateForm] = useState(false)
+  const { showNotification } = useNotifications()
+  const [createFormOpen, setCreateFormOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [showUserDetail, setShowUserDetail] = useState(false)
+  const [showUserEdit, setShowUserEdit] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showRevokeConfirm, setShowRevokeConfirm] = useState(false)
+  const [selectedMunicipality, setSelectedMunicipality] = useState("all")
 
-  // Mock user data
-  const users = [
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  // Capricorn District user data
+  const [users, setUsers] = useState<any[]>([
     {
       id: 1,
-      name: "John Smith",
-      email: "john@district.gov",
+      name: "Thabo Mokoena",
+      email: "thabo.mokoena@capricorn.gov",
       role: "district_manager",
-      district: "Kraaifontein",
+      municipality: "polokwane",
       status: "active"
     },
     {
       id: 2,
-      name: "Mike Davis",
-      email: "mike@local.gov",
+      name: "Sarah Dlamini",
+      email: "sarah.dlamini@polokwane.gov",
       role: "local_admin",
-      district: "Kraaifontein",
-      town: "Kraaifontein Central",
+      municipality: "polokwane",
       status: "active"
     },
     {
       id: 3,
-      name: "Lisa Chen",
-      email: "lisa@local.gov",
+      name: "Peter Potgieter",
+      email: "peter.potgieter@blouberg.gov",
       role: "local_admin",
-      district: "Kraaifontein",
-      town: "Wallacedene",
+      municipality: "blouberg",
       status: "active"
     },
     {
       id: 4,
-      name: "Tom Wilson",
-      email: "tom@local.gov",
+      name: "Maria Molefe",
+      email: "maria.molefe@molemole.gov",
       role: "local_admin",
-      district: "Kraaifontein",
-      town: "Bloekombos",
+      municipality: "molemole",
       status: "active"
     },
     {
       id: 5,
-      name: "Dr. Sarah Johnson",
-      email: "sarah@medical.gov",
-      role: "operations",
-      district: "Kraaifontein",
-      department: "medical",
+      name: "Jacob Sekukuni",
+      email: "jacob.sekukuni@lepel.gov",
+      role: "local_admin",
+      municipality: "lepel",
       status: "active"
     },
     {
       id: 6,
-      name: "Capt. James Brown",
-      email: "james@fire.gov",
+      name: "Operations Team",
+      email: "operations@capricorn.gov",
       role: "operations",
-      district: "Kraaifontein",
-      department: "fire",
+      municipality: "polokwane",
+      department: "emergency_services",
       status: "active"
     }
-  ]
+  ])
+
+  // Filter users by municipality
+  const filteredUsers = selectedMunicipality === "all" 
+    ? users 
+    : users.filter(user => user.municipality === selectedMunicipality)
+
+  const handleDeleteUser = async (userId: number | string, userName: string) => {
+    setSelectedUser({ id: userId, name: userName })
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteUser = async () => {
+    try {
+      // In a real implementation, this would delete from auth.users and profiles
+      console.log(`Deleting user: ${selectedUser?.id} - ${selectedUser?.name}`)
+      
+      // Remove from local state - handle both string and number IDs
+      setUsers(users.filter(u => {
+        const userIdStr = typeof selectedUser?.id === 'string' ? selectedUser.id : selectedUser?.id?.toString()
+        return u.id !== userIdStr
+      }))
+      
+      showNotification('success', 'User Deleted', `User "${selectedUser?.name}" has been deleted successfully`)
+      setShowDeleteConfirm(false)
+      setSelectedUser(null)
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      showNotification('error', 'Delete Failed', 'Failed to delete user')
+    }
+  }
+
+  const handleRevokeAccess = async (userId: number | string, userName: string) => {
+    setSelectedUser({ id: userId, name: userName })
+    setShowRevokeConfirm(true)
+  }
+
+  const confirmRevokeAccess = async () => {
+    try {
+      // In a real implementation, this would disable user account
+      console.log(`Revoking access for user: ${selectedUser?.id} - ${selectedUser?.name}`)
+      
+      // Update user status in local state - handle both string and number IDs
+      setUsers(users.map(u => {
+        const userIdStr = typeof selectedUser?.id === 'string' ? selectedUser.id : selectedUser?.id?.toString()
+        return u.id !== userIdStr
+      }))
+      
+      showNotification('success', 'Access Revoked', `Access revoked for user "${selectedUser?.name}"`)
+      setShowRevokeConfirm(false)
+      setSelectedUser(null)
+    } catch (error) {
+      console.error('Error revoking access:', error)
+      showNotification('error', 'Revoke Failed', 'Failed to revoke access')
+    }
+  }
+
+  const handleCreateUser = async (formData: {
+    name: string
+    email: string
+    role: string
+    municipality: string
+    department: string
+  }) => {
+    try {
+      // In a real implementation, this would create user in Supabase auth and profiles
+      console.log('Creating user:', formData)
+
+      const newUser = {
+        id: parseInt(Date.now().toString()),
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+        municipality: formData.municipality,
+        department: formData.department || '',
+        status: 'active'
+      }
+
+      setUsers([...users, newUser])
+      showNotification('success', 'User Created', `User "${formData.name}" has been created successfully`)
+    } catch (error) {
+      console.error('Error creating user:', error)
+      showNotification('error', 'Create Failed', 'Failed to create user')
+    }
+  }
 
   const getRoleIcon = (role: string) => {
     switch(role) {
@@ -107,88 +208,46 @@ export default function UsersPage() {
     }
   }
 
+  const handleViewUser = (user: any) => {
+    setSelectedUser(user)
+    setShowUserDetail(true)
+  }
+
+  const handleEditUser = (user: any) => {
+    setSelectedUser(user)
+    setShowUserEdit(true)
+  }
+
+  const handleUpdateUser = (updatedUser: any) => {
+    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u))
+  }
+
   const canCreateUser = () => {
     if (isSystemAdmin) return true
     if (isDistrictManager) return true // Can create local admins
     return false
   }
 
-  const getCreateableRoles = () => {
-    if (isSystemAdmin) {
-      return ["district_manager", "local_admin", "operations"]
-    }
-    if (isDistrictManager) {
-      return ["local_admin"] // Only within their district
-    }
-    return []
-  }
-
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-        <p className="text-muted-foreground">
-          {isSystemAdmin 
-            ? "Manage all users across the system"
-            : "Manage local admins within your district"
-          }
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-balance">
+            User Management
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {isSystemAdmin
+              ? "Manage all users across the system"
+              : "Manage local admins within your district"}
+          </p>
+        </div>
+        {canCreateUser() && (
+          <Button onClick={() => setCreateFormOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add User
+          </Button>
+        )}
       </div>
-
-      {/* User Creation */}
-      {canCreateUser() && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              Create New User
-            </CardTitle>
-            <CardDescription>
-              {isSystemAdmin 
-                ? "Create district managers, local admins, or operations users"
-                : "Create local admins within your district"
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid gap-2">
-                <h4 className="text-sm font-medium">Available Roles to Create:</h4>
-                <div className="flex gap-2 flex-wrap">
-                  {getCreateableRoles().map((role) => (
-                    <Badge key={role} variant={getRoleColor(role) as any}>
-                      {getRoleIcon(role)}
-                      <span className="ml-1">{getRoleDisplayName(role)}</span>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              
-              <Button 
-                onClick={() => setShowCreateForm(!showCreateForm)}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {showCreateForm ? "Hide Form" : "Create New User"}
-              </Button>
-              
-              {showCreateForm && (
-                <div className="p-4 border rounded-lg bg-muted/50">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    User creation form would go here. For now, this is a demonstration of the role-based access control.
-                  </p>
-                  <div className="text-xs space-y-1">
-                    <div>• System Admin: Can create all role types</div>
-                    <div>• District Manager: Can create local admins only</div>
-                    <div>• Local Admin: Cannot create users</div>
-                    <div>• Operations: Cannot create users</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Users List */}
       <Card>
@@ -203,7 +262,28 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {users.map((user) => (
+            {/* Municipality Filter */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Filter by Municipality:</label>
+              <Select value={selectedMunicipality} onValueChange={setSelectedMunicipality}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="All municipalities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Municipalities</SelectItem>
+                  <SelectItem value="polokwane">Polokwane</SelectItem>
+                  <SelectItem value="blouberg">Blouberg</SelectItem>
+                  <SelectItem value="molemole">Molemole</SelectItem>
+                  <SelectItem value="lepel">Lepelle-Nkumpi</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">
+                ({filteredUsers.length} users)
+              </span>
+            </div>
+
+            {/* Users List */}
+            {filteredUsers.map((user) => (
               <div key={user.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -217,23 +297,40 @@ export default function UsersPage() {
                     </Badge>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleViewUser(user)}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
                       <Edit className="h-4 w-4" />
                     </Button>
+                    {(isSystemAdmin || isDistrictManager) && (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-orange-600 hover:text-orange-700"
+                          onClick={() => handleRevokeAccess(user.id, user.name)}
+                        >
+                          <Ban className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteUser(user.id, user.name)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
                 
                 <p className="text-sm text-muted-foreground mb-2">{user.email}</p>
                 
                 <div className="text-xs text-muted-foreground space-y-1">
-                  {user.district && (
-                    <div>• District: {user.district}</div>
-                  )}
-                  {user.town && (
-                    <div>• Town: {user.town}</div>
+                  {user.municipality && (
+                    <div>• Municipality: {user.municipality}</div>
                   )}
                   {user.department && (
                     <div>• Department: {user.department}</div>
@@ -302,6 +399,50 @@ export default function UsersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      <UserDetailSheet
+        user={selectedUser}
+        open={showUserDetail}
+        onOpenChange={setShowUserDetail}
+      />
+
+      <UserEditForm
+        user={selectedUser}
+        open={showUserEdit}
+        onOpenChange={setShowUserEdit}
+        onUpdateUser={handleUpdateUser}
+        onShowNotification={showNotification}
+      />
+
+      {canCreateUser() && (
+        <UserCreateForm
+          open={createFormOpen}
+          onOpenChange={setCreateFormOpen}
+          onCreateUser={handleCreateUser}
+          onShowNotification={showNotification}
+        />
+      )}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete User"
+        description={`Are you sure you want to delete user "${selectedUser?.name}"? This action cannot be undone and will remove all access to the system.`}
+        confirmText="Delete User"
+        type="delete"
+        onConfirm={confirmDeleteUser}
+      />
+
+      <ConfirmDialog
+        open={showRevokeConfirm}
+        onOpenChange={setShowRevokeConfirm}
+        title="Revoke Access"
+        description={`Are you sure you want to revoke access for user "${selectedUser?.name}"? This will suspend their account and prevent system access.`}
+        confirmText="Revoke Access"
+        type="revoke"
+        onConfirm={confirmRevokeAccess}
+      />
     </div>
   )
 }

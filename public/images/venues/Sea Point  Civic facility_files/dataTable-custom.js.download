@@ -1,0 +1,390 @@
+/*!
+ Custom DataTable JS
+*/
+
+// Right now there are 3 variations for data tables - all 3 will be implemented inside this JS file for now.
+
+$(document).ready(function () {
+    // 1) Basic Data Table with dom elements and zero configuration:
+    // var table = $('table.dtCustom').DataTable({
+    $("table.dt-custom").DataTable({
+        language: {
+            searchPlaceholder: "Type here",
+            //customize pagination prev and next buttons: use arrows instead of words
+            paginate: {
+                //'previous': '<span class="fa fa-chevron-left"></span>',
+                //'next': '<span class="fa fa-chevron-right"></span>'
+                previous: '<i class="sprite chevron-left-dark"></i>',
+                next: '<i class="sprite chevron-right-dark"></i>',
+            },
+        },
+
+        sDom:
+            "A<'row search-entries'<'col'l f>>" +
+            "<'row'<'col-12'<'datatable-pagination'i<'tab-dom'p>>>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-12'<'datatable-pagination'i<'tab-dom'p>>>>",
+
+        alphabetSearch: {
+            column: 0,
+        },
+
+        alphabetSearch: {
+            column: 1,
+        },
+
+        drawCallback: function () {
+            $(".alphabet ul").addClass("pagination flex-wrap knowledge-hub");
+            $(".alphabet li").addClass("page-item");
+            $(".alphabet li a").addClass("page-link");
+
+            $(".alphabet .alphabet-info-display").addClass("form-control-static");
+            $(".alphabet a.active").closest("li").addClass("selected");
+
+            $(".alphabet li.page-item a.page-link").click(function () {
+                // If the clicked element has the active class, remove the active class from EVERY .nav-link>.state element
+                if ($(this).hasClass("active")) {
+                    $("a.page-link").removeClass("active");
+                    $(this).parent().addClass("selected");
+                }
+                // Else, the element doesn't have the active class, so we remove it from every element before applying it to the element that was clicked
+                else {
+                    $("a.page-link").removeClass("active");
+                    $(this).parent().removeClass("selected");
+                    $(this).addClass("active");
+                    $(this).parent().addClass("selected");
+                }
+            });
+
+            // Modify alphabet filter
+            $("li.page-item").has("a.empty").addClass("disabled");
+
+            //A-Z Filter - Reposition - bottom
+            // $(".alphabet-bottom").html($(".alphabet"));
+
+            //Scroll to data table when search button click or keypress
+            $(".dt-custom-top input").keyup(function (event) {
+                if (event.which === 13) {
+                    $("#dt-custom-search").click();
+                }
+            });
+
+            $("#dt-custom-search").click(function () {
+                $('html, body').animate({
+                    scrollTop: $(".dt-custom").parent().parent().parent().offset().top
+                }, 2000);
+            });
+        },
+    });
+
+    //Reposition search box as per design
+    $("#dt-custom-top").html($(".dataTables_filter input"));
+    $("#dt-custom-top input:nth-child(2)").appendTo($("#dt-custom-bottom"));
+
+    //Add class to search box
+    $(".dt-search div.search-block input").addClass("search-focus");
+    $(".dt-search div.search-block input").removeClass("form-control-sm");
+
+
+    //A-Z Filter - Reposition - bottom (does not work with onclick)
+    //$(".alphabet").clone().appendTo(".alphabet-bottom");
+
+    //2) Basic Data Table with zero dom elements:
+
+    // Get Data
+    /*var testDataUrl = "assets/js/tableData.json";
+
+
+    $("#loadData").click(function () {
+        loadData();
+    });
+
+    function loadData() {
+        $.ajax({
+            type: 'GET',
+            url: testDataUrl,
+            contentType: "text/plain",
+            dataType: 'json',
+            success: function (data) {
+                myJsonData = data;
+                populateDataTable(myJsonData);
+            },
+            error: function (e) {
+                console.log("There was an error with your request...");
+                console.log("error: " + JSON.stringify(e));
+            }
+        });
+    }
+
+    // populate the data table with JSON data
+    function populateDataTable(data) {
+        console.log("populating data table...");
+        // clear the table before populating it with more data
+        $("table.dt-Custom-NoDom").DataTable().clear();
+        var length = Object.keys(data.departments).length;
+        for (var i = 1; i < length + 1; i++) {
+            var department = data.departments['department' + i];
+
+            // You could also use an ajax property on the data table initialization
+            $('table.dt-Custom-NoDom').dataTable().fnAddData([
+                department.sub_department,
+                department.contact_number,
+                department.fax_number,
+                department.email
+            ]);
+        }
+    }*/
+
+    var jsonData = [
+        { sub_department: "EPWP Help Desk", contact_number: "+27(0) 123 4567", fax_number: "+27(0) 123 4567", email: "ashley.heynes@capetown.gov.za" },
+        { sub_department: "Facilities Management Help Desk", contact_number: "+27(0) 123 4567", fax_number: "+27(0) 123 4567", email: "ashley.heynes@capetown.gov.za" },
+        { sub_department: "HR Service Desk (Option 1)(Roll-over style)", contact_number: "+27(0) 123 4567", fax_number: "+27(0) 123 4567", email: "ashley.heynes@capetown.gov.za" },
+    ];
+
+    $("table.dt-basic").DataTable({
+        data: jsonData,
+        columns: [
+            { data: "sub_department" },
+            { data: "contact_number" },
+            { data: "fax_number" },
+            //{ data: 'email' }
+            {
+                data: "email",
+                render: function (data, type, row, meta) {
+                    if (type === "display") {
+                        data = '<a href="mailto:' + data + '">' + " Email " + "</a>";
+                    }
+
+                    return data;
+                },
+            },
+        ],
+        //Display on the table - no dom elements
+        sDom: "<'row'<'col-sm-12'tr>>",
+
+        columnDefs: [
+            {
+                targets: -1, // Start with the last
+                render: function (data, type, row, meta) {
+                    if (type === "display") {
+                        data = '<a href="profile.php?id=' + encodeURIComponent(data) + '">View Profile</a>';
+                    }
+                    return data;
+                },
+            },
+        ],
+    });
+
+    //3) Complex Data Table with dom elements:
+
+    var data = [
+        {
+            title: "Mr",
+            first_names: "Eric",
+            surname: "Heynes",
+            designation: "Senior Professional Officer",
+            contact_number: "+27(0) 123 4567",
+            cellphone_number: "+27(0) 123 4567",
+            department: "IS&T",
+            known_as: "Ash",
+            staff_no: "10034515 - Salaried",
+            directorate: "Corporate Services",
+            branch: "Business Applications",
+            telephone_number: "+27(0) 123 4567",
+            alt_telephone_number: "+27(0) 123 4567",
+            fax_number: "+27(0) 123 4567",
+            email: "ashley.heynes@capetown.gov.za",
+            suburb: "Bellville",
+            building: "Main Building",
+            building_street_address: "Main Build Street Address",
+            floor: "2nd",
+        },
+        {
+            title: "Mr",
+            first_names: "Ashley",
+            surname: "Heynes",
+            designation: "Senior Professional Officer",
+            contact_number: "+27(0) 123 4567",
+            cellphone_number: "+27(0) 123 4567",
+            department: "IS&T",
+            known_as: "Ash",
+            staff_no: "10034515 - Salaried",
+            directorate: "Corporate Services",
+            branch: "Business Applications",
+            telephone_number: "+27(0) 123 4567",
+            alt_telephone_number: "+27(0) 123 4567",
+            fax_number: "+27(0) 123 4567",
+            email: "ashley.heynes@capetown.gov.za",
+            suburb: "Bellville",
+            building: "Main Building",
+            building_street_address: "Main Build Street Address",
+            floor: "2nd",
+        },
+        {
+            title: "Mr",
+            first_names: "Joey",
+            surname: "Soap",
+            designation: "Senior Professional Officer",
+            contact_number: "+27(0) 123 4567",
+            cellphone_number: "+27(0) 123 4567",
+            department: "IS&T",
+            known_as: "Joe",
+            staff_no: "10011115 - Contractor",
+            directorate: "Corporate Services",
+            branch: "Business Applications",
+            telephone_number: "+27(0) 123 4567",
+            alt_telephone_number: "+27(0) 123 4567",
+            fax_number: "+27(0) 123 4567",
+            email: "joe.soap@capetown.gov.za",
+            suburb: "Bellville",
+            building: "Main Building",
+            building_street_address: "Main Build Street Address",
+            floor: "7nd",
+        },
+    ];
+
+    var complexDataTable = $("table.dt-complex").DataTable();
+    if (complexDataTable != "undefined") {
+        complexDataTable.destroy();
+    }
+
+    complexDataTable = $("table.dt-complex").DataTable({
+        aaData: data,
+
+        language: {
+            searchPlaceholder: "Type here",
+            //customize pagination prev and next buttons: use arrows instead of words
+            paginate: {
+                //'previous': '<span class="fa fa-chevron-left"></span>',
+                //'next': '<span class="fa fa-chevron-right"></span>'
+                previous: '<img src="assets/images/arrow-left.png">',
+                next: '<img src="assets/images/arrow-right.png">',
+            },
+        },
+
+        // Output all columns/ HTML - $.fn.dataTable.Responsive.renderer.tableAll
+        responsive: {
+            details: {
+                display: $.fn.dataTable.Responsive.display.modal({
+                    header: function (row) {
+                        var data = row.data();
+                        //console.log(data.title);
+                        return "Details for " + data.title + " " + data.first_names + " " + data.surname;
+                    },
+                }),
+                renderer: $.fn.dataTable.Responsive.renderer.tableAll({
+                    tableClass: "table",
+                }),
+            },
+        },
+
+        sDom:
+            "<'row'<'col-sm-3'l><'col-sm-3'f>>" +
+            "<'col-12 mb-3 pl-xl-0 pl-lg-0 pl-md-0 pl-sm-0 pr-xl-0 pr-lg-0 pr-md-0 pr-sm-0'<'results-pagination d-flex align-items-center'i<'tab-dom'p>>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'col-12 mb-3 mt-3 pl-xl-0 pl-lg-0 pl-md-0 pl-sm-0 pr-xl-0 pr-lg-0 pr-md-0 pr-sm-0'<'results-pagination d-flex align-items-center'i<'tab-dom'p>>>" +
+            "<'row'<'col-sm-3'f>>",
+
+        aoColumns: [
+            {
+                mData: "title",
+            },
+            {
+                mData: "first_names",
+            },
+            {
+                mData: "surname",
+            },
+            {
+                mData: "designation",
+            },
+            {
+                mData: "contact_number",
+            },
+            {
+                mData: "cellphone_number",
+            },
+            {
+                mData: "department",
+            },
+            {
+                mData: "known_as",
+            },
+            {
+                mData: "staff_no",
+            },
+            {
+                mData: "directorate",
+            },
+            {
+                mData: "branch",
+            },
+            {
+                mData: "telephone_number",
+            },
+            {
+                mData: "alt_telephone_number",
+            },
+            {
+                mData: "fax_number",
+            },
+            {
+                data: "email",
+                render: function (data, type, row, meta) {
+                    if (type === "display") {
+                        data = '<a href="mailto:' + data + '">' + " Email " + "</a>";
+                    }
+
+                    return data;
+                },
+            },
+            {
+                mData: "suburb",
+            },
+            {
+                mData: "building",
+            },
+            {
+                mData: "building_street_address",
+            },
+            {
+                mData: "floor",
+            },
+            {
+                title: "Print Information",
+                sClass: "col-sm-2",
+                render: function (data, type, row) {
+                    return '<button type="button" onclick="window.print()" id="dt-print" class="btn btn-dark btn-small" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Print this page"><img class="options_icon" src="assets/images/ic_local_printshop_48px.svg" alt="Print">Print</button>';
+                },
+            },
+        ],
+
+        drawCallback: function () {},
+    });
+
+    //Print function
+    $(document).on("click", "#print", function () {
+        var section = $("body");
+        var modalBody = $(".modal-body").detach();
+
+        var content = $(".s4-workspace").detach();
+        section.append(modalBody);
+        window.print();
+        section.empty();
+        section.append(content);
+        $(".modal-content").append(modalBody);
+    });
+
+    //Reposition search box as per design
+    $("#dt-complex-top").html($(".dataTables_filter input"));
+    $("#dt-complex-top input:nth-child(2)").appendTo($("#dt-complex-bottom"));
+
+    //Add class to search box
+    $('.dt-search div.search-block input').addClass('search-focus');
+    $('.dt-search div.search-block input').removeClass('form-control-sm');
+
+    //Scroll to data table when search button click or keypress
+
+});
+
+    

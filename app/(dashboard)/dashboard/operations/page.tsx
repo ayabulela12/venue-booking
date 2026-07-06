@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useRole } from "@/components/role-provider"
+import { createClient } from "@supabase/supabase-js"
 import { 
   Shield, 
   Activity,
@@ -21,58 +22,77 @@ import {
   UserCheck
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function OperationsDashboard() {
   const { isOperations } = useRole()
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all")
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    highPriority: 0,
+    mediumPriority: 0,
+    lowPriority: 0
+  })
 
-  if (!isOperations) {
-    return <div>Access denied</div>
-  }
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
-  // Mock data for operations notifications
-  const notifications = [
-    {
-      id: 1,
-      event: "Community Festival",
-      venue: "Kraaifontein Sports Center",
-      date: "2024-05-18",
-      attendees: 500,
-      departments: ["medical", "traffic", "police"],
-      priority: "high",
-      status: "confirmed"
-    },
-    {
-      id: 2,
-      event: "Youth Concert",
-      venue: "Community Hall",
-      date: "2024-05-20",
-      attendees: 200,
-      departments: ["medical", "traffic"],
-      priority: "medium",
-      status: "pending"
-    },
-    {
-      id: 3,
-      event: "Sports Tournament",
-      venue: "Wallacedene Field",
-      date: "2024-05-22",
-      attendees: 300,
-      departments: ["medical", "fire", "traffic"],
-      priority: "medium",
-      status: "confirmed"
-    },
-    {
-      id: 4,
-      event: "Town Meeting",
-      venue: "Local Library",
-      date: "2024-05-25",
-      attendees: 50,
-      departments: [],
-      priority: "low",
-      status: "confirmed"
+  useEffect(() => {
+    fetchOperationsData()
+  }, [])
+
+  const fetchOperationsData = async () => {
+    try {
+      // Get all bookings from Capricorn District
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .in('municipality', ['polokwane', 'blouberg', 'molemole', 'lepel'])
+        .order('date', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching operations data:', error)
+        toast.error('Failed to load operations data')
+        return
+      }
+
+      // Convert bookings to operations notifications
+      const operationsNotifications = bookings?.map(booking => ({
+        id: booking.id,
+        event: booking.title,
+        venue: booking.venue_id, // We'll need to join with venues table
+        date: booking.date,
+        attendees: booking.expected_attendance,
+        departments: booking.expected_attendance > 500 ? ['medical', 'traffic', 'police'] : 
+                     booking.expected_attendance > 200 ? ['medical', 'traffic'] : 
+                     booking.expected_attendance > 100 ? ['medical'] : [],
+        priority: booking.expected_attendance > 500 ? 'high' : 
+                 booking.expected_attendance > 200 ? 'medium' : 'low',
+        status: booking.status,
+        municipality: booking.municipality
+      })) || []
+
+      setNotifications(operationsNotifications)
+
+      // Calculate stats
+      const highPriority = operationsNotifications.filter(n => n.priority === 'high').length
+      const mediumPriority = operationsNotifications.filter(n => n.priority === 'medium').length
+      const lowPriority = operationsNotifications.filter(n => n.priority === 'low').length
+
+      setStats({
+        totalEvents: operationsNotifications.length,
+        highPriority,
+        mediumPriority,
+        lowPriority
+      })
+    } catch (error) {
+      console.error('Error in fetchOperationsData:', error)
+      toast.error('Failed to load operations data')
     }
-  ]
+  }
 
   const departments = [
     { id: "medical", name: "Medical", icon: Ambulance, color: "red" },
@@ -86,7 +106,7 @@ export default function OperationsDashboard() {
     : notifications.filter(n => n.departments.includes(selectedDepartment))
 
   const getDepartmentIcon = (deptId: string) => {
-    const dept = departments.find(d => d.id === deptId)
+    const dept = departments.find((d: any) => d.id === deptId)
     const Icon = dept?.icon || Shield
     return <Icon className="h-4 w-4" />
   }
@@ -105,7 +125,7 @@ export default function OperationsDashboard() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Operations Dashboard</h1>
         <p className="text-muted-foreground">
-          Department operations and intelligent event notifications
+          Capricorn District operations and intelligent event notifications
         </p>
       </div>
 
@@ -119,7 +139,7 @@ export default function OperationsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {notifications.filter(n => n.departments.includes(dept.id)).length}
+                {selectedDepartment === 'all' ? stats.totalEvents : notifications.filter((n: any) => n.departments.includes(selectedDepartment)).length}
               </div>
               <p className="text-xs text-muted-foreground">Active notifications</p>
             </CardContent>
@@ -189,9 +209,9 @@ export default function OperationsDashboard() {
             <div className="p-3 bg-white rounded-lg border">
               <h4 className="font-medium text-sm mb-2">📊 Current Status</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• {notifications.filter(n => n.priority === "high").length} high-priority events</li>
-                <li>• {notifications.filter(n => n.status === "pending").length} pending confirmations</li>
-                <li>• {notifications.filter(n => n.departments.includes("medical")).length} medical deployments</li>
+                <li>• {stats.highPriority} high-priority events</li>
+                <li>• {notifications.filter((n: any) => n.status === "pending").length} pending confirmations</li>
+                <li>• {notifications.filter((n: any) => n.departments.includes("medical")).length} medical deployments</li>
               </ul>
             </div>
           </div>
@@ -208,13 +228,13 @@ export default function OperationsDashboard() {
           <CardDescription>
             {selectedDepartment === "all" 
               ? "All department notifications"
-              : `${departments.find(d => d.id === selectedDepartment)?.name} department notifications`
+              : `${departments.find((d: any) => d.id === selectedDepartment)?.name} department notifications`
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredNotifications.map((notification) => (
+            {filteredNotifications.map((notification: any) => (
               <div key={notification.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium">{notification.event}</h4>

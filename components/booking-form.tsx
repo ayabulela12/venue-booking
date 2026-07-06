@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { format } from "date-fns"
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -74,6 +74,18 @@ export function BookingFormDialog({ open, onOpenChange }: BookingFormProps) {
     amplifiedNoise: false,
     liquorLicense: false,
   })
+
+  const todayStart = useMemo(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
+  useEffect(() => {
+    if (formData.date && formData.date < todayStart) {
+      setFormData((prev) => ({ ...prev, date: todayStart }))
+    }
+  }, [formData.date, todayStart])
 
   const conflicts = useMemo(() => {
     if (!formData.venueId || !formData.date || !formData.startTime || !formData.endTime) {
@@ -171,15 +183,52 @@ export function BookingFormDialog({ open, onOpenChange }: BookingFormProps) {
         createdBy: undefined,
       }
 
-      await addBooking(booking)
+      try {
+        await addBooking(booking)
 
-      toast.success(
-        isOverride
-          ? "Booking created with override"
-          : "Booking created successfully"
-      )
-      resetForm()
-      onOpenChange(false)
+        toast.success(
+          isOverride
+            ? "Booking created with override"
+            : "Booking created successfully"
+        )
+        resetForm()
+        onOpenChange(false)
+      } catch (bookingError: any) {
+        console.error("Error creating booking:", bookingError)
+        
+        // Better error handling for booking creation
+        if (bookingError?.message) {
+          if (bookingError.message.includes('Database permissions not configured')) {
+            toast.error("Database permissions not configured. Please contact administrator to set up RLS policies for bookings table.", {
+              duration: 8000
+            })
+          } else if (bookingError.message.includes('Row Level Security policy violation')) {
+            toast.error("Database security policies not configured. Please contact administrator to set up proper access policies.", {
+              duration: 8000
+            })
+          } else if (bookingError.message.includes('permission denied')) {
+            toast.error("Access denied. Please contact administrator to configure database permissions.", {
+              duration: 8000
+            })
+          } else if (bookingError.message.includes('already booked')) {
+            toast.error("This venue is already booked for the selected time. Please choose a different time or venue.", {
+              duration: 5000
+            })
+          } else if (bookingError.message.includes('not found')) {
+            toast.error("Selected venue not found. Please select a valid venue.", {
+              duration: 5000
+            })
+          } else {
+            toast.error(`Failed to create booking: ${bookingError.message}`)
+          }
+        } else if (bookingError?.code) {
+          toast.error(`Failed to create booking: ${bookingError.code}`)
+        } else {
+          toast.error("Failed to create booking. Please check your connection and try again.")
+        }
+        
+        // Don't throw - let user fix the issue
+      }
     } catch (error) {
       toast.error("Failed to create booking. Please try again.")
       console.error("Booking creation error:", error)
@@ -313,8 +362,12 @@ export function BookingFormDialog({ open, onOpenChange }: BookingFormProps) {
                       mode="single"
                       selected={formData.date}
                       onSelect={(date) =>
-                        setFormData({ ...formData, date: date || undefined })
+                        setFormData((prev) => ({
+                          ...prev,
+                          date: date && date >= todayStart ? date : undefined,
+                        }))
                       }
+                      disabled={(date) => date < todayStart}
                       initialFocus
                     />
                   </PopoverContent>

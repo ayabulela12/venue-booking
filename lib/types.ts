@@ -1,7 +1,7 @@
 export type RiskLevel = "low" | "medium" | "high"
 export type BookingStatus = "confirmed" | "pending" | "cancelled" | "override" | "denied"
 export type VenueType = "indoor" | "outdoor" | "hybrid"
-export type UserRole = "admin" | "operator"
+export type UserRole = "system_admin" | "district_manager" | "local_admin" | "operations"
 
 export interface Venue {
   id: string
@@ -11,8 +11,12 @@ export interface Venue {
   ownerName: string
   ownerContact: string
   address: string
+  aboutVenue?: string
+  features: string[]
+  activities: string[]
   image?: string
   createdAt: string
+  municipality?: string
 }
 
 export interface Booking {
@@ -35,6 +39,7 @@ export interface Booking {
   conflicts: ConflictResult[]
   createdAt: string
   createdBy?: string
+  municipality?: string
 }
 
 export interface ParkingArea {

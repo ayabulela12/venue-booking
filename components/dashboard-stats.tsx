@@ -4,42 +4,49 @@ import { Building2, Ticket, CalendarDays, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useStore } from "@/lib/store"
 import { useRole } from "@/components/role-provider"
+import { filterBookingsForUser } from "@/lib/booking-filters"
 
 export function DashboardStats() {
   const { state } = useStore()
-  const { isOperator, isAdmin } = useRole()
+  const { role, isLocalAdmin, isAdmin, userId } = useRole()
+
+  const scopedBookings = filterBookingsForUser(state.bookings, state.venues, {
+    role,
+    userId,
+  })
 
   const totalVenues = state.venues.length
-  const activeBookings = state.bookings.filter(
+  const activeBookings = scopedBookings.filter(
     (b) => b.status === "confirmed" || b.status === "override"
   ).length
-  const upcomingBookings = state.bookings.filter((b) => {
+  const upcomingBookings = scopedBookings.filter((b) => {
     const bookingDate = new Date(b.date)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return bookingDate >= today && b.status !== "cancelled"
   }).length
-  const activeAlerts = state.bookings.reduce(
+  const activeAlerts = scopedBookings.reduce(
     (count, b) => count + b.conflicts.length,
     0
   )
 
-  // Operator-specific stats
-  const myBookings = state.bookings.filter((b) => {
+  const myBookings = scopedBookings.filter((b) => {
     const bookingDate = new Date(b.date)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return bookingDate >= today && b.status !== "cancelled" && b.status !== "denied"
   }).length
 
-  const availableVenues = state.venues.filter(v => 
-    !state.bookings.some(b => 
-      b.venueId === v.id && 
-      (b.status === 'confirmed' || b.status === 'override')
-    )
+  const availableVenues = state.venues.filter(
+    (v) =>
+      !scopedBookings.some(
+        (b) =>
+          b.venueId === v.id &&
+          (b.status === "confirmed" || b.status === "override")
+      )
   ).length
 
-  const stats = isOperator ? [
+  const stats = isLocalAdmin ? [
     {
       title: "Total Venues",
       value: totalVenues,
